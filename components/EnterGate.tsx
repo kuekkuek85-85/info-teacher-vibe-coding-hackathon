@@ -26,7 +26,15 @@ export default function EnterGate({
         body: JSON.stringify({ name: name.trim(), code: code.trim(), idToken }),
       });
       if (!res.ok) {
-        setError("이름 또는 입장 코드가 맞지 않습니다. 강사에게 확인해 주세요.");
+        if (res.status === 409) {
+          const body = await res.json().catch(() => null);
+          setError(
+            body?.message ??
+              "이미 다른 기기에서 쓰고 있는 이름입니다. 본인이 맞으면 강사에게 말씀해 주세요.",
+          );
+          return;
+        }
+        setError("이름 또는 수업 코드가 맞지 않습니다. 강사에게 확인해 주세요.");
         return;
       }
       const data = await res.json();
@@ -54,7 +62,7 @@ export default function EnterGate({
         />
         <input
           className="text-input tnum"
-          placeholder="입장 코드"
+          placeholder="수업 코드"
           value={code}
           onChange={(e) => setCode(e.target.value)}
           inputMode="numeric"

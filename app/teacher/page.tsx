@@ -18,9 +18,7 @@ export default function TeacherPage() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [detail, setDetail] = useState<{ name: string; mission: Mission } | null>(null);
   const [order, setOrder] = useState<string[]>([]);
-  const [codes, setCodes] = useState<
-    { name: string; school: string; role: string; code: string }[]
-  >([]);
+  const [workshopCode, setWorkshopCode] = useState("");
   // 프로젝터로 전환하는 순간 전원의 코드가 새어 나가지 않도록 기본은 가린다.
   const [codesOpen, setCodesOpen] = useState(false);
   const [codesError, setCodesError] = useState<string | null>(null);
@@ -95,20 +93,21 @@ export default function TeacherPage() {
       const res = await fetch("/api/admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "listCodes", pin }),
+        body: JSON.stringify({ action: "workshopCode", pin }),
       });
       if (stale()) return;
       if (!res.ok) {
+        const body = await res.json().catch(() => null);
         setCodesError(
           res.status === 401
             ? "PIN이 맞지 않아 코드를 받지 못했습니다. 다시 들어와 주세요."
-            : "코드를 받지 못했습니다. 다시 불러오기를 눌러 주세요.",
+            : (body?.message ?? "코드를 받지 못했습니다. 다시 불러오기를 눌러 주세요."),
         );
         return;
       }
       const body = await res.json();
       if (stale()) return;
-      setCodes(body.list ?? []);
+      setWorkshopCode(String(body.code ?? ""));
     } catch {
       if (stale()) return;
       setCodesError("연결하지 못해 코드를 받지 못했습니다. 다시 불러오기를 눌러 주세요.");
@@ -121,7 +120,7 @@ export default function TeacherPage() {
     if (!authed) {
       // 잠글 때 화면에 남은 코드를 지우고, 돌고 있던 조회의 응답도 버린다.
       codesGeneration.current++;
-      setCodes([]);
+      setWorkshopCode("");
       setCodesOpen(false);
       setCodesError(null);
       setCodesLoading(false);
@@ -242,10 +241,9 @@ export default function TeacherPage() {
       {error ? <p className="mt-4 text-sm text-gCoral">{error}</p> : null}
 
       <section className="mt-8">
-        <h2 className="text-[15px]">입장 코드</h2>
+        <h2 className="text-[15px]">수업 코드</h2>
         <p className="mt-1 text-[13px] text-inkMuted">
-          펼치면 전원의 코드가 한 화면에 나옵니다. 프로젝터에 연결된 화면에서는 펼치지
-          마세요.
+          모두가 같은 코드로 들어옵니다. 칠판에 적거나 화면에 띄워 알려 주세요.
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -253,9 +251,9 @@ export default function TeacherPage() {
             type="button"
             className={codesOpen ? "btn-secondary" : "btn-primary"}
             onClick={() => setCodesOpen((v) => !v)}
-            disabled={codes.length === 0 && !codesOpen}
+            disabled={!workshopCode && !codesOpen}
           >
-            {codesOpen ? "가리기" : "코드 펼치기"}
+            {codesOpen ? "가리기" : "코드 보기"}
           </button>
           {codesError ? (
             <button
@@ -271,26 +269,15 @@ export default function TeacherPage() {
 
         {codesError ? (
           <p className="mt-3 text-sm text-gCoral">{codesError}</p>
-        ) : codesLoading && codes.length === 0 ? (
+        ) : codesLoading && !workshopCode ? (
           <p className="mt-3 text-sm text-inkMuted">불러오는 중입니다.</p>
         ) : null}
 
-        {codesOpen && codes.length > 0 ? (
-          <div className="mt-4 grid gap-2 min-[600px]:grid-cols-2 min-[960px]:grid-cols-3">
-            {codes.map((c) => (
-              <div
-                key={c.name}
-                className="flex items-baseline justify-between gap-3 rounded-[10px] bg-surface1 px-4 py-3"
-              >
-                <span className="truncate text-[15px]">
-                  {c.name}
-                  {c.role === "staff" ? (
-                    <span className="ml-2 text-[12px] text-inkMuted">강사</span>
-                  ) : null}
-                </span>
-                <span className="tnum text-2xl tracking-[0.05em]">{c.code}</span>
-              </div>
-            ))}
+        {codesOpen && workshopCode ? (
+          <div className="mt-4 rounded-[20px] bg-surface2 px-8 py-10 text-center">
+            <p className="tnum text-6xl tracking-[0.12em] min-[600px]:text-8xl">
+              {workshopCode}
+            </p>
           </div>
         ) : null}
       </section>
@@ -378,6 +365,9 @@ export default function TeacherPage() {
               <th className="border-b border-hairlineSoft py-2 text-left font-medium">
                 검토 상대
               </th>
+              <th className="border-b border-hairlineSoft py-2 text-right font-medium">
+                입장
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -407,6 +397,25 @@ export default function TeacherPage() {
                   })}
                   <td className="border-b border-hairlineSoft py-2">
                     {p?.reviewTarget ?? "·"}
+                  </td>
+                  <td className="border-b border-hairlineSoft py-2 text-right">
+                    {p?.ownerUid ? (
+                      <button
+                        type="button"
+                        className="text-[13px] text-accentBlue"
+                        onClick={() => {
+                          if (
+                            !confirm(
+                              `${r.name} 의 이름을 풉니다. 다른 기기에서 다시 입장할 수 있게 됩니다.`,
+                            )
+                          )
+                            return;
+                          call("releaseName", { name: r.name });
+                        }}
+                      >
+                        이름 풀기
+                      </button>
+                    ) : null}
                   </td>
                 </tr>
               );

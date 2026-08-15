@@ -4,7 +4,6 @@
 // 미션 안내문·필드·프롬프트 카드는 원고-실습콘텐츠-이승엽파트.md §B 원문을 그대로 옮겼다.
 
 import { readFileSync } from "node:fs";
-import { writeFileSync } from "node:fs";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
@@ -62,7 +61,8 @@ const extraAccounts = [{ name: "홍길동", school: "예비 검토자", role: "s
 
 roster.push(...extraAccounts);
 
-const sixDigit = () => String(Math.floor(100000 + Math.random() * 900000));
+// 입장 코드는 워크숍 전체가 하나를 함께 쓴다. .env 의 WORKSHOP_CODE 다.
+// 개인별 코드를 쓰던 흔적(codes 컬렉션)은 시딩할 때 지운다.
 
 // ─────────────────────────────────────────────────────────────
 // 2. 미션 8종
@@ -289,7 +289,6 @@ const missions = [
 // ─────────────────────────────────────────────────────────────
 async function main() {
   const batch = db.batch();
-  const codeRows = [["이름", "소속", "역할", "입장코드"]];
 
   // 이전에 시딩한 명단이 남아 있으면 지운다. 자리 데이터가 셔플에 섞이거나
   // 광장에 유령 참가자로 나타나는 것을 막는다.
@@ -308,9 +307,8 @@ async function main() {
       removed++;
     }
   }
-  for (const d of oldCodes.docs) {
-    if (!currentNames.has(d.id)) batch.delete(d.ref);
-  }
+  // 개인별 코드는 더 쓰지 않는다. 남아 있으면 전부 지운다.
+  for (const d of oldCodes.docs) batch.delete(d.ref);
   for (const d of oldProgress.docs) {
     if (!currentNames.has(d.id)) batch.delete(d.ref);
   }
@@ -321,13 +319,6 @@ async function main() {
 
   for (const person of roster) {
     batch.set(db.collection("roster").doc(person.name), person);
-
-    // 이미 발급한 코드는 그대로 둔다. 다시 돌려도 인쇄한 코드가 무효가 되지 않는다.
-    const codeRef = db.collection("codes").doc(person.name);
-    const existing = oldCodes.docs.find((d) => d.id === person.name);
-    const code = existing?.data()?.code ?? sixDigit();
-    if (!existing) batch.set(codeRef, { code });
-    codeRows.push([person.name, person.school, person.role, code]);
   }
 
   for (const mission of missions) {
@@ -347,21 +338,21 @@ async function main() {
 
   await batch.commit();
 
-  const csv = codeRows.map((r) => r.join(",")).join("\n");
-  const csvPath = new URL("./codes-출력.csv", import.meta.url);
-  writeFileSync(csvPath, "﻿" + csv, "utf8");
-
   console.log(`명단 ${roster.length}명, 미션 ${missions.length}종을 넣었습니다.`);
   if (removed > 0) {
     console.log(`명단에서 빠진 ${removed}명의 기록도 함께 지웠습니다.`);
   }
-  console.log(`입장 코드 배부용 파일: scripts/codes-출력.csv`);
-  console.log(csv);
+  if (oldCodes.size > 0) {
+    console.log(`더 쓰지 않는 개인별 코드 ${oldCodes.size}건을 지웠습니다.`);
+  }
+  console.log(
+    `수업 코드는 .env 의 WORKSHOP_CODE 하나입니다: ${process.env.WORKSHOP_CODE || "(설정 안 됨)"}`,
+  );
 
   if (extraAccounts.length > 0) {
     const names = extraAccounts.map((t) => t.name).join(", ");
     console.log(`\n예비 검토자 계정: ${names}`);
-    console.log("학생이 홀수일 때 짝 없는 한 명을 검토합니다. 코드를 따로 보관하세요.");
+    console.log("학생이 홀수일 때 짝 없는 한 명을 검토합니다.");
   }
 }
 
