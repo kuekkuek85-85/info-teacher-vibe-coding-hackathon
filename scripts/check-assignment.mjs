@@ -31,8 +31,7 @@ const [progressSnap, rosterSnap] = await Promise.all([
 
 const roster = rosterSnap.docs.map((d) => d.data());
 const students = roster.filter((r) => r.role === "student").map((r) => r.name);
-const fallback =
-  process.env.FALLBACK_REVIEWER_NAME || process.env.INSTRUCTOR_NAME || "이승엽";
+const fallback = process.env.FALLBACK_REVIEWER_NAME ?? "";
 
 const assign = new Map();
 for (const d of progressSnap.docs) {

@@ -30,9 +30,21 @@ if (!name) {
   process.exit(1);
 }
 
-await getFirestore(app)
-  .collection("progress")
-  .doc(name)
-  .set({ stuck: true, stuckAt: FieldValue.serverTimestamp() }, { merge: true });
+const db = getFirestore(app);
+
+// 오타로 없는 이름을 넣으면 껍데기 문서가 생겨 광장에 유령이 뜬다.
+const roster = await db.collection("roster").doc(name).get();
+if (!roster.exists) {
+  console.error(`${name} 은 명단에 없습니다. 이름을 확인해 주세요.`);
+  process.exit(1);
+}
+
+const progress = await db.collection("progress").doc(name).get();
+if (!progress.exists) {
+  console.error(`${name} 이 아직 입장하지 않았습니다. 입장한 뒤에 다시 실행해 주세요.`);
+  process.exit(1);
+}
+
+await progress.ref.update({ stuck: true, stuckAt: FieldValue.serverTimestamp() });
 
 console.log(`${name} 을 막힌 상태로 바꿨습니다.`);

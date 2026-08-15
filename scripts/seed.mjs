@@ -37,15 +37,13 @@ const db = getFirestore(app);
 //    교체 방법: 아래 배열의 name·school 을 실제 값으로 바꾸고 다시 실행한다.
 //    동명이인이 있으면 name 을 "이름(소속)" 형식으로 적는다.
 // ─────────────────────────────────────────────────────────────
-const INSTRUCTOR_NAME = process.env.INSTRUCTOR_NAME || "이승엽";
-
 const roster = [
   ...Array.from({ length: 17 }, (_, i) => ({
     name: `수강생${String(i + 1).padStart(2, "0")}`,
     school: "소속 미입력",
     role: "student",
   })),
-  { name: INSTRUCTOR_NAME, school: "장평중", role: "staff" },
+  { name: "이승엽", school: "장평중", role: "staff" },
   ...Array.from({ length: 4 }, (_, i) => ({
     name: `강사${String(i + 1).padStart(2, "0")}`,
     school: "소속 미입력",
@@ -293,17 +291,32 @@ async function main() {
   const batch = db.batch();
   const codeRows = [["이름", "소속", "역할", "입장코드"]];
 
-  // 이전에 시딩한 명단이 남아 있으면 지운다. 자리 데이터가 셔플에 섞이는 것을 막는다.
+  // 이전에 시딩한 명단이 남아 있으면 지운다. 자리 데이터가 셔플에 섞이거나
+  // 광장에 유령 참가자로 나타나는 것을 막는다.
   const currentNames = new Set(roster.map((p) => p.name));
-  const [oldRoster, oldCodes] = await Promise.all([
+  const [oldRoster, oldCodes, oldProgress, oldReviews] = await Promise.all([
     db.collection("roster").get(),
     db.collection("codes").get(),
+    db.collection("progress").get(),
+    db.collection("reviews").get(),
   ]);
+
+  let removed = 0;
   for (const d of oldRoster.docs) {
-    if (!currentNames.has(d.id)) batch.delete(d.ref);
+    if (!currentNames.has(d.id)) {
+      batch.delete(d.ref);
+      removed++;
+    }
   }
   for (const d of oldCodes.docs) {
     if (!currentNames.has(d.id)) batch.delete(d.ref);
+  }
+  for (const d of oldProgress.docs) {
+    if (!currentNames.has(d.id)) batch.delete(d.ref);
+  }
+  for (const d of oldReviews.docs) {
+    const v = d.data();
+    if (!currentNames.has(v.reviewer) || !currentNames.has(v.target)) batch.delete(d.ref);
   }
 
   for (const person of roster) {
@@ -339,6 +352,9 @@ async function main() {
   writeFileSync(csvPath, "﻿" + csv, "utf8");
 
   console.log(`명단 ${roster.length}명, 미션 ${missions.length}종을 넣었습니다.`);
+  if (removed > 0) {
+    console.log(`명단에서 빠진 ${removed}명의 기록도 함께 지웠습니다.`);
+  }
   console.log(`입장 코드 배부용 파일: scripts/codes-출력.csv`);
   console.log(csv);
 

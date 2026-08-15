@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/admin";
+import { resolveFallbackReviewer } from "@/lib/fallbackReviewer";
 import { pairUp } from "@/lib/pairing";
 
 export const dynamic = "force-dynamic";
@@ -54,15 +55,16 @@ export async function POST(request: Request) {
         });
         const students = roster.filter((r) => r.role === "student").map((r) => r.name);
 
-        // 홀수라 짝이 없는 한 명을 검토할 예비 검토자다. 명단에 있어야 한다.
-        const fallbackName =
-          process.env.FALLBACK_REVIEWER_NAME || process.env.INSTRUCTOR_NAME || "이승엽";
-        const fallbackReviewer =
-          roster.find((r) => r.name === fallbackName)?.name ??
-          roster.find((r) => r.role === "staff")?.name ??
-          null;
+        const check = resolveFallbackReviewer(
+          roster,
+          students,
+          process.env.FALLBACK_REVIEWER_NAME,
+        );
+        if (!check.ok) {
+          return NextResponse.json({ ok: false, message: check.message }, { status: 500 });
+        }
 
-        const assignment = pairUp(students, fallbackReviewer);
+        const assignment = pairUp(students, check.reviewer);
         const batch = adminDb.batch();
 
         for (const [person, target] of assignment) {

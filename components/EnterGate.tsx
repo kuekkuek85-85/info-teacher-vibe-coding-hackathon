@@ -42,7 +42,7 @@ export default function EnterGate({
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-5">
       <h1 className="display text-5xl">해커톤 베이스캠프</h1>
-      <p className="mt-3 text-inkMuted">2026 바이브 코딩 역량강화 워크숍</p>
+      <p className="mt-3 text-inkMuted">2026 정보 교사 바이브 코딩 역량강화 워크숍</p>
 
       <form onSubmit={submit} className="mt-10 space-y-3">
         <input
@@ -66,10 +66,6 @@ export default function EnterGate({
       </form>
 
       {error ? <p className="mt-4 text-sm text-gCoral">{error}</p> : null}
-
-      <p className="mt-10 text-[13px] text-inkMuted">
-        제출물에 학생 실명을 적지 마세요.
-      </p>
     </main>
   );
 }

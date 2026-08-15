@@ -67,6 +67,11 @@ export default function MissionPage({
           ← 홈으로
         </Link>
 
+        {/* 작성 중에도 계속 보여야 한다. PRD 5장의 고정 노출 요구사항이다. */}
+        <p className="sticky top-14 z-10 -mx-5 bg-canvas px-5 py-2 text-[13px] text-inkMuted">
+          제출물에 학생 실명을 적지 마세요.
+        </p>
+
         {!ready ? (
           <p className="mt-6 text-inkMuted">불러오는 중입니다.</p>
         ) : !mission ? (
@@ -115,10 +120,6 @@ export default function MissionPage({
               {mission.id === "m5" ? (
                 <PeerReviewSection myName={name} target={progress?.reviewTarget} />
               ) : null}
-
-              <p className="text-[13px] text-inkMuted">
-                제출물에 학생 실명을 적지 마세요.
-              </p>
             </div>
           </>
         )}

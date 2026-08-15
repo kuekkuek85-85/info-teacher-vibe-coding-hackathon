@@ -49,8 +49,10 @@ progressSnap.docs.forEach((d) => batch.delete(d.ref));
 reviewsSnap.docs.forEach((d) => batch.delete(d.ref));
 const missions = await db.collection("missions").get();
 missions.docs.forEach((d) => batch.update(d.ref, { open: false }));
+// 리허설에서 정한 발표 순서가 남아 있으면 당일 /present 에 그대로 뜬다.
+batch.set(db.collection("config").doc("global"), { presentOrder: [] }, { merge: true });
 await batch.commit();
 
 console.log(
-  `progress ${progressSnap.size}건, reviews ${reviewsSnap.size}건을 지웠습니다. 미션 ${missions.size}종을 닫았습니다.`,
+  `progress ${progressSnap.size}건, reviews ${reviewsSnap.size}건을 지웠습니다. 미션 ${missions.size}종을 닫고 발표 순서를 비웠습니다.`,
 );

@@ -84,7 +84,13 @@ export default function TeacherPage() {
           body: JSON.stringify({ action, pin, ...payload }),
         });
         if (!res.ok) {
-          setError("요청이 거부되었습니다. PIN을 다시 확인해 주세요.");
+          if (res.status === 401) {
+            setError("PIN이 맞지 않습니다. 다시 입력해 주세요.");
+            return null;
+          }
+          // 서버가 원인을 알려 주면 그대로 보여 준다. 설정 문제를 짐작하지 않게.
+          const body = await res.json().catch(() => null);
+          setError(body?.message ?? "요청을 처리하지 못했습니다. 잠시 뒤 다시 눌러 주세요.");
           return null;
         }
         return await res.json();

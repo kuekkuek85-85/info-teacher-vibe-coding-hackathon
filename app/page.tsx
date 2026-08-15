@@ -77,10 +77,6 @@ export default function HomePage() {
             </div>
           )}
         </section>
-
-        <p className="mt-12 text-[13px] text-inkMuted">
-          제출물에 학생 실명을 적지 마세요.
-        </p>
       </main>
       <StuckButton
         stuck={progress?.stuck === true}

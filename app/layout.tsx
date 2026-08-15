@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "해커톤 베이스캠프",
-  description: "2026 바이브 코딩 역량강화 워크숍",
+  description: "2026 정보 교사 바이브 코딩 역량강화 워크숍",
 };
 
 export default function RootLayout({
