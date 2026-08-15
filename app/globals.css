@@ -1,0 +1,56 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: #090909;
+  color: #ffffff;
+  font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.display {
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.tnum {
+  font-feature-settings: "tnum";
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-full bg-white px-[15px] py-[10px] text-sm font-medium text-black disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-full bg-surface1 px-[15px] py-[10px] text-sm font-medium text-ink disabled:opacity-50;
+  }
+  .card {
+    @apply rounded-[20px] bg-surface1 p-6;
+  }
+  .card-featured {
+    @apply rounded-[20px] bg-surface2 p-6;
+  }
+  .text-input {
+    @apply w-full rounded-[10px] bg-surface1 px-[14px] py-[10px] text-ink outline-none placeholder:text-inkMuted focus:shadow-[0_0_0_1px_rgba(0,153,255,0.35)];
+  }
+}
+
+/* 마크다운 렌더 공통 (making, 미션 안내문) */
+.md h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; margin: 1.5rem 0 0.75rem; }
+.md h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.03em; margin: 1.25rem 0 0.5rem; }
+.md h3 { font-size: 1.05rem; font-weight: 600; margin: 1rem 0 0.5rem; }
+.md p { margin: 0.5rem 0; line-height: 1.6; }
+.md ul, .md ol { margin: 0.5rem 0 0.5rem 1.25rem; line-height: 1.6; }
+.md ul { list-style: disc; }
+.md ol { list-style: decimal; }
+.md code { background: #141414; border-radius: 6px; padding: 0.1rem 0.35rem; font-size: 0.875em; }
+.md pre { background: #141414; border-radius: 10px; padding: 1rem; overflow-x: auto; margin: 0.75rem 0; }
+.md pre code { background: transparent; padding: 0; }
+.md a { color: #0099ff; }
+.md table { border-collapse: collapse; margin: 0.75rem 0; width: 100%; }
+.md th, .md td { border-bottom: 1px solid #1a1a1a; padding: 0.4rem 0.6rem; text-align: left; font-size: 0.875rem; }
+.md th { color: #999999; font-weight: 500; }
+.md blockquote { border-left: 2px solid #262626; padding-left: 0.75rem; color: #999999; margin: 0.5rem 0; }
