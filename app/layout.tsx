@@ -13,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className="min-h-screen bg-canvas text-ink">{children}</body>
+      <body className="min-h-screen bg-canvas text-ink">
+        <div className="mx-auto max-w-[1000px]">{children}</div>
+      </body>
     </html>
   );
 }

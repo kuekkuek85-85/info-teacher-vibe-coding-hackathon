@@ -38,13 +38,15 @@ export default function MissionPage({
 
   if (!name) {
     return (
-      <main className="mx-auto max-w-md px-5 py-20">
-        <p className="text-inkMuted">
-          입장하지 않았습니다. 홈에서 이름과 입장 코드를 넣어 주세요.
-        </p>
-        <Link href="/" className="btn-primary mt-6">
-          홈으로
-        </Link>
+      <main className="mx-auto max-w-[420px] px-3 py-16">
+        <div className="plate p-4">
+          <p className="text-ink">
+            입장하지 않았습니다. 홈에서 이름과 수업 코드를 넣어 주세요.
+          </p>
+          <Link href="/" className="btn-signal mt-4">
+            홈으로
+          </Link>
+        </div>
       </main>
     );
   }
@@ -61,49 +63,43 @@ export default function MissionPage({
           clearSession();
           setName(null);
         }}
+        notice="제출물에 학생 실명을 적지 마세요"
       />
-      <main className="mx-auto max-w-3xl px-5 pb-24 pt-6">
-        <Link href="/" className="text-[13px] text-inkMuted hover:text-ink">
+      <main className="mx-auto max-w-[820px] px-3 pb-24 pt-3">
+        <Link href="/" className="link-bold">
           ← 홈으로
         </Link>
 
-        {/* 작성 중에도 계속 보여야 한다. PRD 5장의 고정 노출 요구사항이다. */}
-        <p className="sticky top-14 z-10 -mx-5 bg-canvas px-5 py-2 text-[13px] text-inkMuted">
-          제출물에 학생 실명을 적지 마세요.
-        </p>
-
         {!ready ? (
-          <p className="mt-6 text-inkMuted">불러오는 중입니다.</p>
+          <p className="plate mt-3 p-3 text-carbon">불러오는 중입니다.</p>
         ) : !mission ? (
-          <p className="mt-6 text-inkMuted">없는 미션입니다.</p>
+          <p className="plate mt-3 p-3 text-carbon">없는 미션입니다.</p>
         ) : !mission.open ? (
-          <div className="mt-6">
-            <h1 className="display text-[32px]">아직 열리지 않은 미션입니다</h1>
-            <p className="mt-3 text-inkMuted">
+          <div className="plate mt-3 p-6 text-center">
+            <p className="wordmark-sm text-[24px]">아직 열리지 않은 미션입니다</p>
+            <p className="mt-3 text-carbon">
               강사가 열면 홈 스텝퍼의 자물쇠가 풀립니다.
             </p>
           </div>
         ) : (
           <>
-            <header
-              className={
-                isGate
-                  ? "mt-6 rounded-[20px] bg-gradient-to-br from-gMagenta to-gViolet p-6"
-                  : "mt-6"
-              }
-            >
-              <p className="text-[13px] text-inkMuted">
-                {mission.stepLabel} · {mission.session}
-              </p>
-              <h1 className="display mt-2 text-[32px]">
-                {mission.id} {mission.title}
-              </h1>
+            <header className="plate mt-3 p-1">
+              <div
+                className={`px-5 py-7 ${isGate ? "bg-gamesRed" : "bg-lavender"}`}
+              >
+                <p
+                  className={`chrome-label ${isGate ? "text-white" : "text-carbon"}`}
+                >
+                  {mission.id} · {mission.stepLabel} · {mission.session}
+                </p>
+                <p className="wordmark mt-2 text-[30px]">{mission.title}</p>
+              </div>
             </header>
 
-            <div className="mt-6 space-y-6">
+            <div className="mt-3 space-y-3">
               <CarryoverPanel carryover={mission.carryover} progress={progress} />
 
-              <div className="md text-[15px] text-inkMuted">
+              <div className="plate md bg-surface p-3 text-ink">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{mission.guide}</ReactMarkdown>
               </div>
 

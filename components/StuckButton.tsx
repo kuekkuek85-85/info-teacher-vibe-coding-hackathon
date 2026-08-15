@@ -13,8 +13,17 @@ export default function StuckButton({
       onClick={() => onToggle(!stuck)}
       className={
         stuck
-          ? "fixed bottom-5 right-5 z-30 rounded-full bg-gCoral px-[15px] py-[10px] text-sm font-medium text-ink"
-          : "fixed bottom-5 right-5 z-30 rounded-full bg-surface1 px-[15px] py-[10px] text-sm font-medium text-ink"
+          ? "fixed bottom-4 right-4 z-30 bg-brand px-4 py-3 text-white chrome-label"
+          : "fixed bottom-4 right-4 z-30 btn-amber"
+      }
+      style={
+        stuck
+          ? {
+              borderRadius: 2,
+              borderTop: "1px solid #ff6b73",
+              borderBottom: "2px solid #8c000b",
+            }
+          : undefined
       }
     >
       {stuck ? "해결됐어요" : "막혔어요 🙋"}

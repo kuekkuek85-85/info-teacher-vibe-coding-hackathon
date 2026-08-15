@@ -87,53 +87,51 @@ export default function PeerReviewSection({
 
   return (
     <div className="space-y-6">
-      <section className="card">
-        <h2 className="display text-2xl">동료 검토</h2>
+      <section className="plate">
+        <div className="section-bar">
+          <span className="bar-glyph" />
+          동료 검토
+          {target ? <span className="ml-auto normal-case">상대: {target}</span> : null}
+        </div>
 
         {!target ? (
-          <p className="mt-3 text-inkMuted">검토 상대가 아직 배정되지 않았습니다.</p>
+          <p className="p-3 text-carbon">검토 상대가 아직 배정되지 않았습니다.</p>
         ) : (
-          <>
-            <p className="mt-3 text-sm text-inkMuted">검토 상대: {target}</p>
+          <div className="plate-inset m-2 space-y-4 p-3">
+            {REVIEW_SOURCE.map(({ mission, keys }) => {
+              const data = targetProgress?.missions?.[mission]?.data;
+              return (
+                <div key={mission} className="plate-white p-3">
+                  <p className="chrome-label text-inkSoft">{mission} 제출물</p>
+                  {!data ? (
+                    <p className="mt-2 text-ink">상대가 아직 제출하지 않았습니다.</p>
+                  ) : (
+                    <dl className="mt-2 space-y-2">
+                      {keys.map((k) =>
+                        data[k]?.trim() ? (
+                          <div key={k}>
+                            <dt className="chrome-label text-inkSoft">{k}</dt>
+                            <dd className="whitespace-pre-wrap text-ink">{data[k]}</dd>
+                          </div>
+                        ) : null,
+                      )}
+                    </dl>
+                  )}
+                </div>
+              );
+            })}
 
-            <div className="mt-5 space-y-4">
-              {REVIEW_SOURCE.map(({ mission, keys }) => {
-                const data = targetProgress?.missions?.[mission]?.data;
-                return (
-                  <div key={mission} className="rounded-[10px] bg-canvas p-4">
-                    <p className="text-[13px] text-inkMuted">{mission} 제출물</p>
-                    {!data ? (
-                      <p className="mt-2 text-sm text-inkMuted">
-                        상대가 아직 제출하지 않았습니다.
-                      </p>
-                    ) : (
-                      <dl className="mt-2 space-y-3">
-                        {keys.map((k) =>
-                          data[k]?.trim() ? (
-                            <div key={k}>
-                              <dt className="text-[13px] text-inkMuted">{k}</dt>
-                              <dd className="whitespace-pre-wrap text-sm">{data[k]}</dd>
-                            </div>
-                          ) : null,
-                        )}
-                      </dl>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <ul className="mt-6 space-y-2">
+            <ul className="space-y-2">
               {CHECKLIST_ITEMS.map((item) => (
                 <li key={item.key}>
-                  <label className="flex items-center gap-3 text-[15px]">
+                  <label className="flex items-center gap-2 text-ink">
                     <input
                       type="checkbox"
                       checked={checklist[item.key] === true}
                       onChange={(e) =>
                         setChecklist((prev) => ({ ...prev, [item.key]: e.target.checked }))
                       }
-                      className="h-4 w-4 accent-white"
+                      className="h-4 w-4 accent-signal"
                     />
                     {item.label}
                   </label>
@@ -141,10 +139,10 @@ export default function PeerReviewSection({
               ))}
             </ul>
 
-            <label className="mt-5 block">
-              <span className="text-[13px] text-inkMuted">코멘트 한 줄</span>
+            <label className="block">
+              <span className="link-bold">코멘트 한 줄</span>
               <textarea
-                className="text-input mt-2"
+                className="text-input mt-1"
                 rows={2}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -155,35 +153,44 @@ export default function PeerReviewSection({
               type="button"
               onClick={save}
               disabled={saving}
-              className="btn-primary mt-4"
+              className="btn-signal"
             >
               {saving ? "저장하는 중" : saved ? "저장됨" : "검토 저장"}
             </button>
-            {saveError ? <p className="mt-3 text-sm text-gCoral">{saveError}</p> : null}
-          </>
+            {saveError ? (
+              <p className="bg-brand px-3 py-2 font-bold text-white">{saveError}</p>
+            ) : null}
+          </div>
         )}
       </section>
 
-      <section className="card">
-        <h2 className="display text-2xl">내가 받은 검토</h2>
+      <section className="plate">
+        <div className="section-bar">
+          <span className="bar-glyph" />
+          내가 받은 검토
+        </div>
         {received.length === 0 ? (
-          <p className="mt-3 text-inkMuted">아직 받은 검토가 없습니다.</p>
+          <p className="p-3 text-carbon">아직 받은 검토가 없습니다.</p>
         ) : (
-          <ul className="mt-4 space-y-4">
+          <ul className="plate-inset m-2 space-y-3 p-3">
             {received.map((r) => (
-              <li key={r.reviewer} className="rounded-[10px] bg-canvas p-4">
-                <p className="text-[13px] text-inkMuted">{r.reviewer}</p>
-                <ul className="mt-2 space-y-1 text-sm">
+              <li key={r.reviewer} className="plate-white p-3">
+                <p className="chrome-label text-inkSoft">{r.reviewer}</p>
+                <ul className="mt-2 space-y-1 text-ink">
                   {CHECKLIST_ITEMS.map((item) => (
                     <li key={item.key}>
-                      <span className={r.checklist?.[item.key] ? "text-success" : "text-inkMuted"}>
-                        {r.checklist?.[item.key] ? "✓" : "·"}
+                      <span
+                        className={
+                          r.checklist?.[item.key] ? "font-bold text-brand" : "text-inkSoft"
+                        }
+                      >
+                        {r.checklist?.[item.key] ? "●" : "○"}
                       </span>{" "}
                       {item.label}
                     </li>
                   ))}
                 </ul>
-                {r.comment ? <p className="mt-3 text-[15px]">{r.comment}</p> : null}
+                {r.comment ? <p className="mt-2 text-ink">{r.comment}</p> : null}
               </li>
             ))}
           </ul>

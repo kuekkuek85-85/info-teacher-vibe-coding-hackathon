@@ -46,26 +46,29 @@ export default function HomePage() {
   return (
     <>
       <TopNav name={name} role={role} onLeave={leave} />
-      <main className="mx-auto max-w-[1199px] px-5 pb-24 pt-6">
-        <section>
-          <h1 className="display text-[32px]">파이프라인</h1>
-          <p className="mt-1 text-sm text-inkMuted">
-            열린 칸은 언제든 다시 들어가 고칠 수 있습니다.
-          </p>
-          <div className="mt-4">
+      <main className="mx-auto max-w-[1000px] px-3 pb-24 pt-3">
+        <section className="plate">
+          <div className="section-bar">
+            <span className="bar-glyph" />
+            파이프라인
+          </div>
+          <div className="p-3">
+            <p className="mb-3 text-carbon">
+              열린 칸은 언제든 다시 들어가 고칠 수 있습니다.
+            </p>
             <Stepper missions={missions} progress={progress} />
           </div>
         </section>
 
-        <section className="mt-10">
+        <section className="mt-3">
           {!ready ? (
-            <p className="text-inkMuted">불러오는 중입니다.</p>
+            <p className="plate p-3 text-carbon">불러오는 중입니다.</p>
           ) : openMissions.length === 0 ? (
-            <p className="text-inkMuted">
+            <p className="plate p-3 text-carbon">
               아직 열린 미션이 없습니다. 강사가 열면 여기에 나타납니다.
             </p>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2">
               {openMissions.map((m) => (
                 <MissionCard
                   key={m.id}

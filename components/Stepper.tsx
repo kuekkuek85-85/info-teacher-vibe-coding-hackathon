@@ -14,21 +14,27 @@ export default function Stepper({
   const current = progress?.currentStep;
 
   return (
-    <div className="-mx-5 overflow-x-auto px-5">
-      <ol className="flex min-w-max gap-2">
+    <div className="overflow-x-auto">
+      <ol className="flex min-w-max gap-[3px]">
         {missions.map((m) => {
           const entry = progress?.missions?.[m.id];
           const done = entry?.status === "submitted";
           const locked = !m.open;
           const isCurrent = m.id === current && !locked;
 
-          const base =
-            "flex w-[92px] shrink-0 flex-col gap-1 rounded-[10px] px-3 py-2 text-left";
+          // 지금 여기만 시그널 오렌지로 빛난다. 잠긴 칸은 가라앉은 인디고.
+          // 오렌지 위에는 카본 글자를 올린다. 흰 글자는 대비가 2.4:1 로 읽기 어렵다.
           const tone = locked
-            ? "bg-surface1 text-inkMuted cursor-not-allowed"
+            ? "bg-mutedIndigo text-white cursor-not-allowed"
             : isCurrent
-              ? "bg-gradient-to-br from-gViolet to-[#4a2fd0] text-ink"
-              : "bg-surface1 text-ink hover:bg-surface2";
+              ? "bg-signal text-carbon"
+              : "bg-periwinkle text-ink hover:bg-canvasSoft";
+
+          const bevel = locked
+            ? { borderTop: "1px solid #7a7bb0", borderBottom: "2px solid #3d4f97" }
+            : isCurrent
+              ? { borderTop: "1px solid #ffc17a", borderBottom: "2px solid #a85c0c" }
+              : { borderTop: "1px solid #b6c4e4", borderBottom: "2px solid #3d4f97" };
 
           return (
             <li key={m.id}>
@@ -36,14 +42,15 @@ export default function Stepper({
                 type="button"
                 disabled={locked}
                 onClick={() => router.push(`/mission/${m.id}`)}
-                className={`${base} ${tone}`}
+                className={`flex w-[84px] shrink-0 flex-col gap-[2px] px-2 py-2 text-left ${tone}`}
+                style={{ borderRadius: 2, ...bevel }}
               >
-                <span className="flex items-center gap-1 text-[13px] tnum">
+                <span className="chrome-label flex items-center gap-1">
                   {m.id}
-                  {done ? <span className="text-success">✓</span> : null}
-                  {locked ? <span aria-label="잠김">🔒</span> : null}
+                  {done ? <span className="text-brand">●</span> : null}
+                  {locked ? <span>🔒</span> : null}
                 </span>
-                <span className="truncate text-[13px]">{m.stepLabel}</span>
+                <span className="micro truncate font-bold">{m.stepLabel}</span>
               </button>
             </li>
           );

@@ -1,56 +1,235 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* 2001년 닌텐도닷컴의 콘솔 크롬. 웹폰트 없이 Arial 로 가고,
+   한글은 같은 시절 윈도 기본 글꼴인 돋움으로 받는다. */
 body {
-  background: #090909;
-  color: #ffffff;
-  font-family: "Pretendard Variable", Pretendard, -apple-system, sans-serif;
-  letter-spacing: -0.01em;
-}
-
-.display {
-  letter-spacing: -0.03em;
-  font-weight: 600;
-}
-
-.tnum {
-  font-feature-settings: "tnum";
+  background: #7a8aba;
+  color: #21242e;
+  font-family: Arial, "Dotum", "돋움", "Apple SD Gothic Neo", "Malgun Gothic",
+    sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 @layer components {
-  .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full bg-white px-[15px] py-[10px] text-sm font-medium text-black disabled:opacity-50;
+  /* ─── 베벨 판 ─────────────────────────────────────────────
+     모든 영역은 사출 성형된 판이다. 위는 밝게 아래는 어둡게. */
+  .plate {
+    @apply bg-canvas;
+    border-top: 1px solid #a8b6d8;
+    border-left: 1px solid #a8b6d8;
+    border-right: 1px solid #3d4f97;
+    border-bottom: 2px solid #3d4f97;
   }
-  .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full bg-surface1 px-[15px] py-[10px] text-sm font-medium text-ink disabled:opacity-50;
+  .plate-raised {
+    @apply bg-periwinkle;
+    border-top: 1px solid #b6c4e4;
+    border-left: 1px solid #b6c4e4;
+    border-right: 1px solid #3d4f97;
+    border-bottom: 2px solid #3d4f97;
   }
-  .card {
-    @apply rounded-[20px] bg-surface1 p-6;
+  .plate-inset {
+    @apply bg-platinum;
+    border-top: 2px solid #3d4f97;
+    border-left: 1px solid #3d4f97;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
   }
-  .card-featured {
-    @apply rounded-[20px] bg-surface2 p-6;
+  .plate-white {
+    @apply bg-surface;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #3d4f97;
+    border-bottom: 2px solid #3d4f97;
   }
+
+  /* 명령 레이어. 스피커 그릴 같은 하프톤 점무늬를 깐다. */
+  .slab {
+    @apply bg-carbon text-white;
+    background-image: radial-gradient(
+      rgba(255, 255, 255, 0.09) 1px,
+      transparent 1px
+    );
+    background-size: 3px 3px;
+  }
+
+  /* ─── 글자 ───────────────────────────────────────────── */
+  .chrome-label {
+    @apply font-bold uppercase;
+    font-size: 11px;
+    line-height: 1.1;
+    letter-spacing: 0.5px;
+  }
+  .nav-link {
+    @apply font-bold uppercase;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0.5px;
+  }
+  .link-bold {
+    @apply font-bold text-inkSoft;
+    font-size: 12px;
+  }
+  .micro {
+    font-size: 10px;
+    line-height: 1.3;
+  }
+  /* 히어로 워드마크. 외곽선과 딱딱한 그림자가 박스아트의 문법이다. */
+  .wordmark {
+    font-family: "Arial Black", Arial, "Dotum", "돋움", sans-serif;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    -webkit-text-stroke: 2px #21242e;
+    paint-order: stroke fill;
+    text-shadow: 3px 3px 0 #21242e;
+  }
+  .wordmark-sm {
+    font-family: "Arial Black", Arial, "Dotum", "돋움", sans-serif;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1;
+    -webkit-text-stroke: 1.5px #21242e;
+    paint-order: stroke fill;
+    text-shadow: 2px 2px 0 #21242e;
+  }
+
+  /* ─── 버튼 ───────────────────────────────────────────── */
+  /* 앰버는 도구, 시그널 오렌지는 전진과 제출, 카본은 보조 액션. */
+  /* 손가락으로 눌러야 하니 최소 44px 을 지킨다. 2001년에는 없던 요구지만
+     지금 쓰는 사람들은 노트북과 태블릿을 함께 쓴다. */
+  .btn-amber {
+    @apply inline-flex items-center justify-center bg-amber text-carbon chrome-label;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 2px;
+    border-top: 1px solid #f6d08a;
+    border-left: 1px solid #f6d08a;
+    border-right: 1px solid #9a6a12;
+    border-bottom: 2px solid #9a6a12;
+  }
+  .btn-amber:active {
+    @apply bg-navGold;
+  }
+  /* 시그널 오렌지 위의 흰 글자는 대비가 2.4:1 로 읽기 어렵다.
+     카본 글자로 두면 7:1 을 넘긴다. 전진 색은 그대로 살린다. */
+  .btn-signal {
+    @apply inline-flex items-center justify-center bg-signal text-carbon chrome-label;
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 2px;
+    border-top: 1px solid #ffc17a;
+    border-left: 1px solid #ffc17a;
+    border-right: 1px solid #a85c0c;
+    border-bottom: 2px solid #a85c0c;
+  }
+  .btn-signal:active {
+    filter: brightness(0.92);
+  }
+  .btn-carbon {
+    @apply inline-flex items-center justify-center slab chrome-label;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 0;
+    border-top: 1px solid #4a4f60;
+    border-left: 1px solid #4a4f60;
+    border-right: 1px solid #05060a;
+    border-bottom: 2px solid #05060a;
+  }
+  .btn-amber:disabled,
+  .btn-signal:disabled,
+  .btn-carbon:disabled {
+    opacity: 0.5;
+  }
+
+  /* 둥근 것은 물리 조작부에만. 원형 화살표 배지가 그 자리다. */
+  /* 원형 화살표는 실제로 앞으로 보내는 자리에만 쓴다. 제목 장식으로 쓰지 않는다. */
+  .arrow-disc {
+    @apply inline-flex items-center justify-center bg-signal text-carbon;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    border: 1px solid #a85c0c;
+  }
+  /* 패널 머리띠의 표식. 색을 쓰지 않는 구조 글리프다. */
+  .bar-glyph {
+    @apply inline-block bg-chromeIndigo;
+    width: 10px;
+    height: 10px;
+  }
+
+  /* ─── 입력 ───────────────────────────────────────────── */
   .text-input {
-    @apply w-full rounded-[10px] bg-surface1 px-[14px] py-[10px] text-ink outline-none placeholder:text-inkMuted focus:shadow-[0_0_0_1px_rgba(0,153,255,0.35)];
+    @apply w-full bg-surface text-ink;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 2px;
+    border-top: 2px solid #3d4f97;
+    border-left: 1px solid #3d4f97;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+    outline: none;
+  }
+  /* 오렌지만 두르면 흰 배경과 대비가 모자란다. 카본 테두리를 함께 두른다. */
+  .text-input:focus {
+    box-shadow: 0 0 0 2px #f68d1f, 0 0 0 4px #21242e;
+  }
+
+  /* 패널을 덮는 머리띠. 실크스크린 각인 같은 대문자 라벨이 올라간다. */
+  .section-bar {
+    @apply flex items-center gap-2 bg-canvas text-ink chrome-label;
+    padding: 6px 10px;
+    border-top: 1px solid #a8b6d8;
+    border-bottom: 1px solid #3d4f97;
+  }
+  .dotted-divider {
+    border-top: 1px dotted #60619c;
   }
 }
 
-/* 마크다운 렌더 공통 (making, 미션 안내문) */
-.md h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; margin: 1.5rem 0 0.75rem; }
-.md h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.03em; margin: 1.25rem 0 0.5rem; }
-.md h3 { font-size: 1.05rem; font-weight: 600; margin: 1rem 0 0.5rem; }
-.md p { margin: 0.5rem 0; line-height: 1.6; }
-.md ul, .md ol { margin: 0.5rem 0 0.5rem 1.25rem; line-height: 1.6; }
+/* 마크다운 렌더 (미션 안내문, 만든 과정) */
+.md h1 { font-size: 18px; font-weight: 700; margin: 16px 0 8px; }
+.md h2 { font-size: 15px; font-weight: 700; margin: 14px 0 6px; }
+.md h3 { font-size: 13px; font-weight: 700; margin: 12px 0 6px; }
+.md p { margin: 6px 0; line-height: 1.5; }
+.md ul, .md ol { margin: 6px 0 6px 18px; line-height: 1.5; }
 .md ul { list-style: disc; }
 .md ol { list-style: decimal; }
-.md code { background: #141414; border-radius: 6px; padding: 0.1rem 0.35rem; font-size: 0.875em; }
-.md pre { background: #141414; border-radius: 10px; padding: 1rem; overflow-x: auto; margin: 0.75rem 0; }
-.md pre code { background: transparent; padding: 0; }
-.md a { color: #0099ff; }
-.md table { border-collapse: collapse; margin: 0.75rem 0; width: 100%; }
-.md th, .md td { border-bottom: 1px solid #1a1a1a; padding: 0.4rem 0.6rem; text-align: left; font-size: 0.875rem; }
-.md th { color: #999999; font-weight: 500; }
-.md blockquote { border-left: 2px solid #262626; padding-left: 0.75rem; color: #999999; margin: 0.5rem 0; }
+.md code {
+  background: #dedede;
+  border: 1px solid #5a5f8c;
+  border-radius: 2px;
+  padding: 0 3px;
+  font-size: 11px;
+}
+.md pre {
+  background: #ffffff;
+  border-top: 2px solid #3d4f97;
+  border-left: 1px solid #3d4f97;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  border-radius: 2px;
+  padding: 10px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+.md pre code { background: transparent; border: 0; padding: 0; }
+.md a { color: #3d4f97; font-weight: 700; }
+.md table { border-collapse: collapse; margin: 8px 0; width: 100%; }
+.md th, .md td {
+  border: 1px solid #5a5f8c;
+  padding: 4px 6px;
+  text-align: left;
+  font-size: 11px;
+}
+.md th { background: #9fbee7; font-weight: 700; }
+.md td { background: #ffffff; }
+.md blockquote {
+  border-left: 3px solid #3d4f97;
+  background: #9fbee7;
+  padding: 6px 10px;
+  margin: 8px 0;
+}

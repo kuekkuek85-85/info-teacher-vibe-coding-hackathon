@@ -12,15 +12,18 @@ export default function CarryoverPanel({
   if (!carryover?.length) return null;
 
   return (
-    <section className="rounded-[20px] bg-surface2 p-6">
-      <p className="text-[13px] text-inkMuted">이전 단계에서 가져옴</p>
-      <dl className="mt-3 space-y-4">
+    <section className="plate">
+      <div className="section-bar">
+        <span className="bar-glyph" />
+        이전 단계에서 가져옴
+      </div>
+      <dl className="plate-inset m-2 space-y-3 p-3">
         {carryover.map((c) => {
           const value = progress?.missions?.[c.fromMission]?.data?.[c.fromKey];
           return (
             <div key={`${c.fromMission}.${c.fromKey}`}>
-              <dt className="text-[13px] text-inkMuted">{c.label}</dt>
-              <dd className="mt-1 whitespace-pre-wrap text-[15px]">
+              <dt className="chrome-label text-inkSoft">{c.label}</dt>
+              <dd className="mt-1 whitespace-pre-wrap text-ink">
                 {value?.trim() ? value : "이전 단계 제출물이 아직 없습니다"}
               </dd>
             </div>

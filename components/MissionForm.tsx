@@ -103,29 +103,29 @@ export default function MissionForm({
           : "";
 
   return (
-    <div className="space-y-6">
-      <div className="flex min-h-[20px] items-center justify-end gap-2 text-[13px]">
-        <span className={status === "error" ? "text-gCoral" : "text-inkMuted"}>
-          {statusText}
-        </span>
+    <div className="plate">
+      <div className="section-bar">
+        <span className="bar-glyph" />
+        제출 양식
+        <span className="ml-auto normal-case text-inkSoft">{statusText}</span>
       </div>
 
-      {status === "error" ? (
-        <p className="rounded-[10px] bg-surface1 p-4 text-sm text-gCoral">
-          저장하지 못했습니다. 연결이 돌아오면 자동으로 다시 저장됩니다.
-        </p>
-      ) : null}
+      <div className="plate-inset m-2 space-y-4 p-3">
+        {status === "error" ? (
+          <p className="bg-brand px-3 py-2 font-bold text-white">
+            저장하지 못했습니다. 연결이 돌아오면 자동으로 다시 저장됩니다.
+          </p>
+        ) : null}
 
-      {restoredNotice ? (
-        <p className="rounded-[10px] bg-surface1 p-4 text-sm text-inkMuted">
-          저장되지 않은 입력을 복원했습니다.
-        </p>
-      ) : null}
+        {restoredNotice ? (
+          <p className="bg-canvasSoft px-3 py-2 text-ink">
+            저장되지 않은 입력을 복원했습니다.
+          </p>
+        ) : null}
 
-      <div className="space-y-5">
         {mission.fields.map((field) => (
           <label key={field.key} className="block">
-            <span className="text-[15px]">{field.label}</span>
+            <span className="link-bold">{field.label}</span>
             {field.type === "textarea" ? (
               <textarea
                 className="text-input mt-2"
@@ -152,10 +152,10 @@ export default function MissionForm({
                 {(field.options ?? []).map((o) => {
                   const chosen = (values[field.key] ?? "").split("|").filter(Boolean);
                   return (
-                    <span key={o} className="flex items-center gap-3 text-[15px]">
+                    <span key={o} className="flex items-center gap-2 text-ink">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 accent-white"
+                        className="h-4 w-4 accent-signal"
                         checked={chosen.includes(o)}
                         onChange={(e) => {
                           const next = e.target.checked
@@ -182,19 +182,21 @@ export default function MissionForm({
         ))}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 px-2 pb-3">
         <button
           type="button"
           onClick={submit}
           disabled={submitting}
-          className="btn-primary"
+          className="btn-signal"
         >
           {submitted ? "다시 제출하기" : "제출하기"}
         </button>
-        <span className="text-[13px] text-inkMuted">제출 후에도 수정됩니다</span>
+        <span className="text-carbon">제출 후에도 수정됩니다</span>
       </div>
 
-      {submitError ? <p className="text-sm text-gCoral">{submitError}</p> : null}
+      {submitError ? (
+        <p className="mx-2 mb-3 bg-brand px-3 py-2 font-bold text-white">{submitError}</p>
+      ) : null}
     </div>
   );
 }

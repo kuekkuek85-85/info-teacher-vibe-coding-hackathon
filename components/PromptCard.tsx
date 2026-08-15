@@ -16,14 +16,22 @@ export default function PromptCard({ text }: { text: string }) {
   };
 
   return (
-    <section className="card">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[13px] text-inkMuted">클로드에 붙여넣을 카드</p>
-        <button type="button" onClick={copy} className="btn-secondary">
+    <section className="plate">
+      <div className="section-bar">
+        <span className="bar-glyph" />
+        클로드에 붙여넣을 카드
+        <button type="button" onClick={copy} className="btn-amber ml-auto">
           {copied ? "복사됨" : "복사"}
         </button>
       </div>
-      <pre className="mt-3 overflow-x-auto whitespace-pre-wrap rounded-[10px] bg-canvas p-4 text-[13px] leading-relaxed">
+      <pre className="m-2 overflow-x-auto whitespace-pre-wrap bg-surface p-3 text-[11px] leading-relaxed text-ink"
+        style={{
+          borderTop: "2px solid #3d4f97",
+          borderLeft: "1px solid #3d4f97",
+          borderRight: "1px solid #ffffff",
+          borderBottom: "1px solid #ffffff",
+        }}
+      >
         {text}
       </pre>
     </section>

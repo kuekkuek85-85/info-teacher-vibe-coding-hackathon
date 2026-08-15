@@ -343,15 +343,6 @@ components:
 ---
 
 
-## 이 저장소에서의 예외 (2026-08-16)
-
-원본 스펙을 그대로 따르지 않는 자리가 둘 있다. 이유와 함께 적어 둔다. 예외를 늘릴 때는 여기에 추가한다.
-
-1. **시그널 오렌지 버튼의 글자는 흰색이 아니라 카본이다.** 스펙의 `button-submit` 은 `{colors.on-primary}` 흰색을 지정하지만, `{colors.signal}` 위의 흰 글자는 대비가 2.4:1 이라 읽히지 않는다. 카본으로 바꾸면 6.45:1 이 된다. 전진을 뜻하는 오렌지 배경은 그대로 두고, 원래부터 카본 글자인 앰버 버튼은 스펙대로다.
-2. **히어로에 사진을 넣지 않는다.** 스펙은 full-bleed 사진 필드를 요구하지만 이 앱에는 쓸 사진이 없다. 페이지 색조 단색 위에 외곽선 워드마크를 올리는 것으로 대신한다.
-
-버튼과 표의 기호 버튼은 최소 44×44px 을 지킨다. 스펙의 Responsive 절이 현대 포트에 요구하는 사항이다.
-
 ## Overview
 
 Nintendo.com circa 2001 is the web rendered as **console hardware**. Where most sites of the era reached for either grunge texture or corporate gradients, this interface builds itself out of **brushed-periwinkle metal plates** — every region is a discrete beveled panel, edge-lit with a brighter highlight on top and a `{colors.chrome-indigo}` shadow line beneath, as if stamped from the same injection-molded plastic as a Game Boy. The whole page reads as one machine faceplate: a body of `{colors.canvas}` periwinkle chrome carrying inset modules, with the corners of the largest panels physically **chamfered** (cut at 45°) rather than rounded, reinforcing the manufactured-object feeling.
