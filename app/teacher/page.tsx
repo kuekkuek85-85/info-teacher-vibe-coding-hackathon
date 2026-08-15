@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
 import type { Mission, Progress, RosterEntry } from "@/lib/types";
@@ -18,6 +18,13 @@ export default function TeacherPage() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [detail, setDetail] = useState<{ name: string; mission: Mission } | null>(null);
   const [order, setOrder] = useState<string[]>([]);
+  const [codes, setCodes] = useState<
+    { name: string; school: string; role: string; code: string }[]
+  >([]);
+  // 프로젝터로 전환하는 순간 전원의 코드가 새어 나가지 않도록 기본은 가린다.
+  const [codesOpen, setCodesOpen] = useState(false);
+  const [codesError, setCodesError] = useState<string | null>(null);
+  const [codesLoading, setCodesLoading] = useState(false);
 
   // 저장된 PIN 이 있어도 서버에 다시 물어본 뒤에 들여보낸다.
   useEffect(() => {
@@ -72,6 +79,56 @@ export default function TeacherPage() {
       unsubs.forEach((u) => u());
     };
   }, [authed]);
+
+  // 입장 코드는 실시간 구독 대상이 아니다. 필요할 때 받아 온다.
+  // 조회 도중 잠그면 늦게 온 응답이 코드를 되살리므로 세대 번호로 걸러 낸다.
+  const codesGeneration = useRef(0);
+
+  const loadCodes = useCallback(async () => {
+    if (!pin) return;
+    const generation = ++codesGeneration.current;
+    const stale = () => generation !== codesGeneration.current;
+
+    setCodesLoading(true);
+    setCodesError(null);
+    try {
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "listCodes", pin }),
+      });
+      if (stale()) return;
+      if (!res.ok) {
+        setCodesError(
+          res.status === 401
+            ? "PIN이 맞지 않아 코드를 받지 못했습니다. 다시 들어와 주세요."
+            : "코드를 받지 못했습니다. 다시 불러오기를 눌러 주세요.",
+        );
+        return;
+      }
+      const body = await res.json();
+      if (stale()) return;
+      setCodes(body.list ?? []);
+    } catch {
+      if (stale()) return;
+      setCodesError("연결하지 못해 코드를 받지 못했습니다. 다시 불러오기를 눌러 주세요.");
+    } finally {
+      if (!stale()) setCodesLoading(false);
+    }
+  }, [pin]);
+
+  useEffect(() => {
+    if (!authed) {
+      // 잠글 때 화면에 남은 코드를 지우고, 돌고 있던 조회의 응답도 버린다.
+      codesGeneration.current++;
+      setCodes([]);
+      setCodesOpen(false);
+      setCodesError(null);
+      setCodesLoading(false);
+      return;
+    }
+    loadCodes();
+  }, [authed, loadCodes]);
 
   const call = useCallback(
     async (action: string, payload: Record<string, unknown> = {}) => {
@@ -185,6 +242,60 @@ export default function TeacherPage() {
       {error ? <p className="mt-4 text-sm text-gCoral">{error}</p> : null}
 
       <section className="mt-8">
+        <h2 className="text-[15px]">입장 코드</h2>
+        <p className="mt-1 text-[13px] text-inkMuted">
+          펼치면 전원의 코드가 한 화면에 나옵니다. 프로젝터에 연결된 화면에서는 펼치지
+          마세요.
+        </p>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className={codesOpen ? "btn-secondary" : "btn-primary"}
+            onClick={() => setCodesOpen((v) => !v)}
+            disabled={codes.length === 0 && !codesOpen}
+          >
+            {codesOpen ? "가리기" : "코드 펼치기"}
+          </button>
+          {codesError ? (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={loadCodes}
+              disabled={codesLoading}
+            >
+              {codesLoading ? "불러오는 중" : "다시 불러오기"}
+            </button>
+          ) : null}
+        </div>
+
+        {codesError ? (
+          <p className="mt-3 text-sm text-gCoral">{codesError}</p>
+        ) : codesLoading && codes.length === 0 ? (
+          <p className="mt-3 text-sm text-inkMuted">불러오는 중입니다.</p>
+        ) : null}
+
+        {codesOpen && codes.length > 0 ? (
+          <div className="mt-4 grid gap-2 min-[600px]:grid-cols-2 min-[960px]:grid-cols-3">
+            {codes.map((c) => (
+              <div
+                key={c.name}
+                className="flex items-baseline justify-between gap-3 rounded-[10px] bg-surface1 px-4 py-3"
+              >
+                <span className="truncate text-[15px]">
+                  {c.name}
+                  {c.role === "staff" ? (
+                    <span className="ml-2 text-[12px] text-inkMuted">강사</span>
+                  ) : null}
+                </span>
+                <span className="tnum text-2xl tracking-[0.05em]">{c.code}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <section className="mt-10">
         <h2 className="text-[15px]">미션 열기</h2>
         <div className="mt-3 flex flex-wrap gap-2">
           {missions.map((m) => (

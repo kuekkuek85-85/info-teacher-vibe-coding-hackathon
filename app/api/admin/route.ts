@@ -32,6 +32,25 @@ export async function POST(request: Request) {
       case "verify":
         return NextResponse.json({ ok: true });
 
+      case "listCodes": {
+        // codes 는 보안 규칙이 클라이언트 읽기를 막는다. PIN 을 확인한 뒤 여기서만 넘긴다.
+        const [rosterSnap, codesSnap] = await Promise.all([
+          adminDb.collection("roster").get(),
+          adminDb.collection("codes").get(),
+        ]);
+        const codeOf = new Map(
+          codesSnap.docs.map((d) => [d.id, String(d.data()?.code ?? "")]),
+        );
+        const list = rosterSnap.docs
+          .map((d) => d.data() as { name: string; school: string; role: string })
+          .map((r) => ({ ...r, code: codeOf.get(r.name) ?? "" }))
+          .sort((a, b) => {
+            if (a.role !== b.role) return a.role === "student" ? -1 : 1;
+            return a.name.localeCompare(b.name, "ko");
+          });
+        return NextResponse.json({ ok: true, list });
+      }
+
       case "openMission": {
         const missionId = String(body.missionId ?? "");
         if (!missionId) return NextResponse.json({ ok: false }, { status: 400 });
