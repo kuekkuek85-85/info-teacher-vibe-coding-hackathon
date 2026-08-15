@@ -54,13 +54,15 @@ const roster = [
 ];
 
 // ─────────────────────────────────────────────────────────────
-// 1-2. 테스트 계정
-//    워크숍 전에 아래 배열을 비우고 다시 시딩하면 사라진다.
-//    빼지 않으면 학생이 18명이 되어 셔플의 홀수 처리가 검증되지 않는다.
+// 1-2. 예비 검토자 겸 테스트 계정
+//    학생이 홀수라 짝이 없는 한 명이 생기면 이 계정이 그 사람을 검토한다.
+//    role 이 staff 라서 짝짓기 대상에 들어가지 않는다. 진행률 집계에서도 빠진다.
+//    화면 확인용으로 미션을 직접 밟아 볼 수도 있다.
+//    .env 의 FALLBACK_REVIEWER_NAME 과 이름이 같아야 한다.
 // ─────────────────────────────────────────────────────────────
-const testAccounts = [{ name: "홍길동", school: "테스트", role: "student" }];
+const extraAccounts = [{ name: "홍길동", school: "예비 검토자", role: "staff" }];
 
-roster.push(...testAccounts);
+roster.push(...extraAccounts);
 
 const sixDigit = () => String(Math.floor(100000 + Math.random() * 900000));
 
@@ -340,10 +342,10 @@ async function main() {
   console.log(`입장 코드 배부용 파일: scripts/codes-출력.csv`);
   console.log(csv);
 
-  if (testAccounts.length > 0) {
-    const names = testAccounts.map((t) => t.name).join(", ");
-    console.log(`\n주의: 테스트 계정이 들어 있습니다 (${names}).`);
-    console.log("워크숍 전에 seed.mjs 의 testAccounts 를 비우고 다시 돌리세요.");
+  if (extraAccounts.length > 0) {
+    const names = extraAccounts.map((t) => t.name).join(", ");
+    console.log(`\n예비 검토자 계정: ${names}`);
+    console.log("학생이 홀수일 때 짝 없는 한 명을 검토합니다. 코드를 따로 보관하세요.");
   }
 }
 

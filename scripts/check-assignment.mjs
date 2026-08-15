@@ -31,7 +31,8 @@ const [progressSnap, rosterSnap] = await Promise.all([
 
 const roster = rosterSnap.docs.map((d) => d.data());
 const students = roster.filter((r) => r.role === "student").map((r) => r.name);
-const instructor = process.env.INSTRUCTOR_NAME || "이승엽";
+const fallback =
+  process.env.FALLBACK_REVIEWER_NAME || process.env.INSTRUCTOR_NAME || "이승엽";
 
 const assign = new Map();
 for (const d of progressSnap.docs) {
@@ -49,7 +50,13 @@ check("학생 전원이 검토자", students.every((s) => assign.has(s)),
   `배정=${students.filter((s) => assign.has(s)).length}/${students.length}`);
 check("학생 전원이 검토를 받음", students.every((s) => [...assign.values()].includes(s)));
 check("자기 자신 검토 없음", [...assign].every(([a, b]) => a !== b));
-check("강사가 검토자로 들어감", assign.has(instructor), `${instructor}->${assign.get(instructor)}`);
+const odd = students.length % 2 === 1;
+check(
+  odd ? "홀수라 예비 검토자가 투입됨" : "짝수라 예비 검토자는 빠짐",
+  odd ? assign.has(fallback) : !assign.has(fallback),
+  `학생=${students.length}명, ${fallback}->${assign.get(fallback) ?? "없음"}`,
+);
+check("예비 검토자는 검토받지 않음", ![...assign.values()].includes(fallback));
 check("ownerUid 보존", progressSnap.docs.every((d) => {
   const v = d.data();
   return v.ownerUid !== undefined;
