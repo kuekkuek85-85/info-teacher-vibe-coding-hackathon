@@ -53,6 +53,15 @@ const roster = [
   })),
 ];
 
+// ─────────────────────────────────────────────────────────────
+// 1-2. 테스트 계정
+//    워크숍 전에 아래 배열을 비우고 다시 시딩하면 사라진다.
+//    빼지 않으면 학생이 18명이 되어 셔플의 홀수 처리가 검증되지 않는다.
+// ─────────────────────────────────────────────────────────────
+const testAccounts = [{ name: "홍길동", school: "테스트", role: "student" }];
+
+roster.push(...testAccounts);
+
 const sixDigit = () => String(Math.floor(100000 + Math.random() * 900000));
 
 // ─────────────────────────────────────────────────────────────
@@ -330,6 +339,12 @@ async function main() {
   console.log(`명단 ${roster.length}명, 미션 ${missions.length}종을 넣었습니다.`);
   console.log(`입장 코드 배부용 파일: scripts/codes-출력.csv`);
   console.log(csv);
+
+  if (testAccounts.length > 0) {
+    const names = testAccounts.map((t) => t.name).join(", ");
+    console.log(`\n주의: 테스트 계정이 들어 있습니다 (${names}).`);
+    console.log("워크숍 전에 seed.mjs 의 testAccounts 를 비우고 다시 돌리세요.");
+  }
 }
 
 main().catch((e) => {
