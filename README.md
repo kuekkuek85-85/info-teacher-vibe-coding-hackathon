@@ -74,6 +74,12 @@ Vercel에 저장소를 연결하고 `.env.local`의 값 9개를 전부 환경 �
 
 환경은 Production, Preview, Development 셋 다 체크합니다.
 
+### 빌드가 실패할 때
+
+`No Output Directory named "public" found` 오류가 나면 Vercel 이 이 프로젝트를 Next.js 로 알아보지 못한 것입니다. 프로젝트의 Settings > General > Framework Preset 을 Next.js 로 바꾸고 다시 배포하세요. 저장소의 `vercel.json` 이 프레임워크를 지정하고 있으니, 그 파일이 포함된 커밋으로 배포해도 해결됩니다.
+
+Root Directory 도 함께 확인하세요. 저장소 루트에 `package.json` 이 있으므로 비워 두거나 `./` 여야 합니다.
+
 ### 등록하는 두 가지 방법
 
 대시보드에서 넣으려면 프로젝트의 Settings > Environment Variables 로 갑니다. 상단의 Import .env 버튼에 `.env.local` 파일을 올리면 한 번에 들어갑니다. 하나씩 붙여넣어도 됩니다.
