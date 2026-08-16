@@ -84,11 +84,14 @@ check(
   (component.match(/rel="noreferrer noopener"/g) ?? []).length === 2,
 );
 
-const page = readFileSync(new URL("../app/mission/[id]/page.tsx", import.meta.url), "utf8");
+const detail = readFileSync(
+  new URL("../components/MissionDetail.tsx", import.meta.url),
+  "utf8",
+);
 check(
   "m8 에서만 띄운다",
-  /mission\.id === "m8" \? \(\s*<PeerToolLinks/.test(page),
-  "page.tsx 의 분기",
+  /mission\.id === "m8" \? <PeerToolLinks/.test(detail),
+  "MissionDetail 의 분기",
 );
 
 console.log(failures === 0 ? "\n전부 통과했습니다." : `\n${failures}건 실패했습니다.`);

@@ -78,7 +78,15 @@ export function useDebouncedSave(
     return () => window.removeEventListener("online", retry);
   }, [run]);
 
-  useEffect(() => () => clearTimeout(timer.current), []);
+  // 화면에서 사라질 때 기다리던 저장을 흘려보낸다.
+  // 홈에서 칸을 바꾸면 페이지 이동이 없어 이 자리가 마지막 기회다.
+  useEffect(
+    () => () => {
+      clearTimeout(timer.current);
+      if (pending.current) void run();
+    },
+    [run],
+  );
 
   /** 저장 실패로 남아 있던 초안을 읽는다. */
   const readBackup = useCallback((): Record<string, string> | null => {

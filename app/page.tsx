@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import CaseShowcase from "@/components/CaseShowcase";
 import EnterGate from "@/components/EnterGate";
 import ExpiredNotice from "@/components/ExpiredNotice";
-import MissionCard from "@/components/MissionCard";
+import MissionDetail from "@/components/MissionDetail";
 import Modal from "@/components/Modal";
 import Stepper from "@/components/Stepper";
 import StuckButton from "@/components/StuckButton";
@@ -31,12 +31,31 @@ export default function HomePage() {
   const [role, setRole] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
   const [casesOpen, setCasesOpen] = useState(false);
-  const { progress, missions, ready, expired, setStuck } = useProgress(name);
+  const [picked, setPicked] = useState<string | null>(null);
+  const { progress, missions, ready, expired, saveMission, submitMission, setStuck } =
+    useProgress(name);
+
+  // 스텝퍼에서 고른 칸. 아직 안 골랐으면 진행 중인 칸을, 그것도 없으면 열린 첫 칸을 편다.
+  const open =
+    missions.find((m) => m.open && m.id === picked) ??
+    missions.find((m) => m.open && m.id === progress?.currentStep) ??
+    missions.find((m) => m.open) ??
+    null;
+
+  // 주소에 남겨야 새로고침해도 보던 칸으로 돌아오고, 링크로 그 칸을 가리킬 수 있다.
+  const select = (id: string) => {
+    setPicked(id);
+    window.history.replaceState(null, "", `/?m=${id}`);
+  };
 
   useEffect(() => {
     setName(getSavedName());
     setRole(getSavedRole());
     setRestored(true);
+
+    // 새로고침이나 링크로 들어온 자리를 먼저 본다
+    const fromUrl = new URLSearchParams(window.location.search).get("m");
+    if (fromUrl) setPicked(fromUrl);
 
     // 사례 팝업은 1일차 오후 소개용이었다. 2일차에는 미션에 바로 들어가야 해서 끈다.
     // 내용은 그대로 있다. 상단 메뉴의 수업 사례나 /cases 에서 볼 수 있다.
@@ -85,11 +104,14 @@ export default function HomePage() {
     setRole(null);
   };
 
-  const openMissions = missions.filter((m) => m.open);
-
   return (
     <>
-      <TopNav name={name} role={role} onLeave={leave} />
+      <TopNav
+        name={name}
+        role={role}
+        onLeave={leave}
+        notice={open ? "제출물에 학생 실명을 적지 마세요" : undefined}
+      />
       <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-12">
         <section>
           <p className="eyebrow">파이프라인</p>
@@ -98,35 +120,45 @@ export default function HomePage() {
             열린 칸은 언제든 다시 들어가 고칠 수 있습니다.
           </p>
           <div className="mt-8">
-            <Stepper missions={missions} progress={progress} />
+            <Stepper
+              missions={missions}
+              progress={progress}
+              selected={open?.id}
+              onSelect={select}
+            />
           </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mt-12">
           {!ready ? (
             <p className="body-lg">불러오는 중입니다.</p>
-          ) : openMissions.length === 0 ? (
+          ) : !open ? (
             <div className="color-block bg-blockCream">
               <p className="subhead">
                 아직 열린 미션이 없습니다. 강사가 열면 여기에 나타납니다.
               </p>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-              {openMissions.map((m) => (
-                <MissionCard
-                  key={m.id}
-                  mission={m}
-                  entry={progress?.missions?.[m.id]}
-                  isCurrent={progress?.currentStep === m.id}
-                />
-              ))}
-            </div>
+            <MissionDetail
+              mission={open}
+              missions={missions}
+              progress={progress}
+              name={name}
+              onSave={(data) => saveMission(open.id, data)}
+              onSubmit={() => submitMission(open.id)}
+            />
           )}
         </section>
       </main>
-      {/* 지금 밟고 있는 단계를 물어볼 수 있게 홈에도 둔다. */}
-      <TutorPanel name={name} missionId={progress?.currentStep} />
+      {/* 칸을 바꾸면 튜터도 새로 연다. 앞 단계 대화가 남으면 다음 질문에 섞인다. */}
+      {open ? (
+        <TutorPanel
+          key={open.id}
+          name={name}
+          missionId={open.id}
+          missionTitle={open.title}
+        />
+      ) : null}
       <StuckButton
         stuck={progress?.stuck === true}
         onToggle={(next) => setStuck(next)}

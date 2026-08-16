@@ -197,5 +197,9 @@ check(
 const page = readFileSync(new URL("../app/mission/[id]/page.tsx", import.meta.url), "utf8");
 check("잠긴 미션 화면에는 띄우지 않는다", /mission\?\.open \? \(\s*<TutorPanel/.test(page));
 
+// 홈에서는 칸을 바꿔도 화면이 안 갈린다. key 가 없으면 앞 단계 대화가 남는다.
+const home = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+check("칸을 바꾸면 튜터를 새로 연다", /<TutorPanel\s+key=\{open\.id\}/.test(home));
+
 console.log(failures === 0 ? "\n전부 통과했습니다." : `\n${failures}건 실패했습니다.`);
 process.exit(failures === 0 ? 0 : 1);

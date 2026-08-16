@@ -107,11 +107,20 @@ check("출처 미션이 없으면 원본 그대로", buildPromptText(broken, mis
 // 8. 미션을 옮겨도 앞 카드에서 고친 내용이 따라오면 안 된다.
 // 화면 상태라 조립 함수로는 못 잡는다. 두 장치가 사라지면 여기서 잡는다.
 const component = readFileSync(new URL("../components/PromptCard.tsx", import.meta.url), "utf8");
-const page = readFileSync(new URL("../app/mission/[id]/page.tsx", import.meta.url), "utf8");
+// 미션 본문은 홈과 미션 화면이 함께 쓴다. 홈에서는 칸을 바꿔도 화면이 안 바뀌므로
+// key 가 없으면 앞 미션의 카드가 그대로 남는다.
+const detail = readFileSync(
+  new URL("../components/MissionDetail.tsx", import.meta.url),
+  "utf8",
+);
 check(
   "카드가 미션마다 새로 만들어진다",
-  /<PromptCard\s+key=\{mission\.id\}/.test(page),
-  "page.tsx 의 key 프롭",
+  /<PromptCard\s+key=\{mission\.id\}/.test(detail),
+  "MissionDetail 의 key 프롭",
+);
+check(
+  "제출 양식도 미션마다 새로 만들어진다",
+  /<MissionForm\s+key=\{mission\.id\}/.test(detail),
 );
 // 카드 머리말은 진행 방식 셋을 모두 처리해야 한다
 for (const [tool, label] of Object.entries({
