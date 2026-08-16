@@ -18,10 +18,11 @@ export const RATE_LIMIT = 20;
  * 하나에 매달리면 워크숍 도중에 통째로 멈춘다.
  */
 export const MODEL_CHAIN = [
-  // 2026-08-16 에 실제로 재 본 응답 시간 순이다. 수업 중에는 기다림이 곧 이탈이다.
-  "gemini-3-flash-preview",
+  // 실제로 재 본 응답 시간 순이다. 수업 중에는 기다림이 곧 이탈이다.
+  // 2026-08-17 같은 질문으로 다시 재니 flash-lite 1.8초, 3-flash-preview 33초였다.
   "gemini-3.1-flash-lite",
   "gemini-3.5-flash",
+  "gemini-3-flash-preview",
   "gemini-flash-latest",
 ];
 

@@ -70,7 +70,7 @@ export default function GrillPanel({
         <div>
           <p className="eyebrow">아이디어 다듬기</p>
           <p className="body-sm mt-2">
-            적은 아이디어를 캐묻습니다. 질문 다섯 개가 오고 답은 정해 주지 않습니다.
+            적은 아이디어를 캐묻습니다. 질문 세 개가 오고 답은 정해 주지 않습니다.
           </p>
         </div>
         <button type="button" onClick={ask} disabled={asking} className="btn-primary">

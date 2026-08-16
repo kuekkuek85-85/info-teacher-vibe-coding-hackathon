@@ -3,8 +3,11 @@
 import { readFileSync } from "node:fs";
 import {
   MAX_IDEA_CHARS,
+  MAX_LINES,
+  MAX_LINE_CHARS,
   buildGrillInput,
   buildGrillPrompt,
+  trimToLines,
   validateGrillInput,
 } from "../lib/grill.ts";
 
@@ -18,18 +21,21 @@ const check = (label: string, ok: boolean, extra = "") => {
 const prompt = buildGrillPrompt();
 check("교육용 바이브 코딩 전문가로 선다", prompt.includes("교육용 바이브 코딩 웹 앱"));
 check("워크숍 맥락을 안다", prompt.includes("정보 교사") && prompt.includes("반나절"));
-check("질문 수를 못 박는다", prompt.includes("질문 5개만"));
+// 연수에서만 쓰는 도구라 기다림을 줄였다. 세 줄이면 훑고 넘어간다.
+check("질문 수를 못 박는다", prompt.includes("질문 3개만"));
+check("한 줄 길이를 못 박는다", prompt.includes("60자를 넘기지 않는다"));
+check("세 줄 말고 붙이지 못하게 한다", prompt.includes("세 줄 말고 아무것도 쓰지 않는다"));
+check("이유를 붙이지 않는다", prompt.includes("이유, 요약, 인사말을 붙이지 않는다"));
 check("답을 대신 정하지 않는다", prompt.includes("답을 대신 정해 주지 않는다"));
 check("칭찬하지 않는다", prompt.includes("칭찬하지 않는다"));
 check("한국어로 쓴다", prompt.includes("한국어로 쓴다"));
-check("마크다운으로 답한다", prompt.includes("형식은 마크다운이다"));
+check("마크다운으로 답한다", prompt.includes("형식은 마크다운 번호 목록"));
 check(
-  "다섯 자리를 하나씩 맡긴다",
+  "다섯 자리 중에서 고른다",
   ["진짜 병목", "누구의 문제", "이미 있는 도구", "반나절", "개인정보"].every((k) =>
     prompt.includes(k),
-  ),
+  ) && prompt.includes("가장 흐린 세 곳"),
 );
-check("한 줄 요약을 시킨다", prompt.includes("한 줄로 줄이면"));
 
 // 2. 캐물 감
 const both = buildGrillInput("형성평가를 그 시간 안에 돌려주고 싶다", "[v] 학생: 사진으로 올린다");
@@ -66,13 +72,64 @@ check(
   ),
 );
 
-// 4. 서버 라우트가 지켜야 할 것
+// 4. 답을 세 줄로 자른다. 프롬프트만으로는 지켜지지 않는다.
+const many = trimToLines(
+  "인사말입니다.\n1. 첫 질문인가요?\n2. 둘째 질문인가요?\n3. 셋째 질문인가요?\n4. 넷째 질문인가요?\n## 요약\n한 줄 요약입니다.",
+);
+check("세 줄만 남긴다", many.split("\n").length === MAX_LINES, `${many.split("\n").length}줄`);
+check("인사말을 버린다", !many.includes("인사말"));
+check("요약과 제목을 버린다", !many.includes("요약"));
+check("넷째 질문을 버린다", !many.includes("넷째"));
+check("질문은 남는다", many.includes("첫 질문") && many.includes("셋째 질문"));
+
+check(
+  "이유가 붙어도 물음표에서 끊는다",
+  trimToLines("1. 진짜 병목인가요? 그 이유는 이러이러합니다.") === "1. 진짜 병목인가요?",
+);
+check(
+  "붙임표 목록도 받는다",
+  trimToLines("- 첫 줄인가요?\n- 둘째 줄인가요?").split("\n").length === 2,
+);
+check(
+  "번호가 없으면 그대로 세 줄까지",
+  trimToLines("첫 줄인가요?\n둘째 줄인가요?\n셋째 줄인가요?\n넷째 줄인가요?").split("\n")
+    .length === MAX_LINES,
+);
+check("빈 답은 빈 채로 돌려준다", trimToLines("") === "");
+// 묻지 않는 줄은 캐묻기가 아니다. 목록으로 와도 걸러야 한다.
+check("묻지 않는 목록은 버린다", trimToLines("- 이것은 이유입니다.\n- 이것도 설명입니다.") === "");
+check(
+  "묻는 줄만 골라 남긴다",
+  trimToLines("1. 이유를 적었습니다.\n2. 진짜 병목인가요?") === "2. 진짜 병목인가요?",
+);
+// 자르다 물음표를 잃으면 질문이 아닌 조각이 나간다. 그런 줄은 통째로 버린다.
+const tooLong = "1. " + "가".repeat(300) + "?";
+check("너무 긴 줄은 버린다", trimToLines(tooLong) === "");
+check(
+  "긴 줄은 버리고 짧은 줄은 남긴다",
+  trimToLines(`${tooLong}\n2. 진짜 병목인가요?`) === "2. 진짜 병목인가요?",
+);
+check(
+  "한도 안이면 그대로 남는다",
+  trimToLines("1. " + "가".repeat(MAX_LINE_CHARS - 5) + "?").length === MAX_LINE_CHARS - 1,
+);
+// 자르기가 먼저면 앞의 긴 줄 때문에 뒤의 멀쩡한 질문까지 잃는다
+check(
+  "앞이 모두 길어도 뒤의 짧은 질문을 살린다",
+  trimToLines(
+    `${tooLong}\n${tooLong}\n${tooLong}\n4. 네 번째는 짧은가요?`,
+  ) === "4. 네 번째는 짧은가요?",
+);
+
+// 5. 서버 라우트가 지켜야 할 것
 const route = readFileSync(new URL("../app/api/grill/route.ts", import.meta.url), "utf8");
 check("입장 토큰을 검증한다", route.includes("checkParticipant"));
 check("몰아 보내기를 막는다", route.includes("checkRate"));
 check("시간을 끊는다", route.includes("TOTAL_TIMEOUT_MS"));
 check("키가 없으면 안내만 낸다", route.includes("GEMINI_API_KEY"));
 check("모델 사슬을 함께 쓴다", route.includes("askGemini"));
+check("내보내기 전에 자른다", route.includes("trimToLines(answer.reply)"));
+check("자르고 나서 비면 오류로 본다", route.includes("if (!trimmed) return fail"));
 
 // 튜터와 캐묻기가 같은 장치를 쓴다. 한쪽만 고치는 일이 없게 한 곳에 둔다.
 const tutor = readFileSync(new URL("../app/api/tutor/route.ts", import.meta.url), "utf8");
@@ -82,6 +139,7 @@ check("튜터에 모델 사슬이 남아 있지 않다", !tutor.includes("genera
 // 5. 화면
 const panel = readFileSync(new URL("../components/GrillPanel.tsx", import.meta.url), "utf8");
 check("버튼 이름이 뾰족하게다", panel.includes('"뾰족하게"'));
+check("화면 안내도 세 개라고 말한다", panel.includes("질문 세 개가 오고"));
 check("마크다운으로 그린다", panel.includes("ReactMarkdown"));
 check("토큰을 실어 보낸다", panel.includes("Bearer ${idToken}"));
 check("답을 저장하지 않는다", !panel.includes("saveMission") && !panel.includes("setDoc"));

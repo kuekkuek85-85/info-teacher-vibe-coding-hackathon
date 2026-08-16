@@ -9,7 +9,12 @@ import {
   tooSlow,
   withDeadline,
 } from "@/lib/gemini";
-import { buildGrillInput, buildGrillPrompt, validateGrillInput } from "@/lib/grill";
+import {
+  buildGrillInput,
+  buildGrillPrompt,
+  trimToLines,
+  validateGrillInput,
+} from "@/lib/grill";
 
 export const dynamic = "force-dynamic";
 
@@ -47,5 +52,9 @@ export async function POST(request: Request) {
   });
   if ("error" in answer) return answer.error;
 
-  return NextResponse.json({ ok: true, reply: answer.reply });
+  // 프롬프트가 지켜 주지 않을 때가 있다. 내보내기 전에 세 줄로 자른다.
+  const trimmed = trimToLines(answer.reply);
+  if (!trimmed) return fail("답을 만들지 못했습니다. 다시 눌러 주세요.", 502);
+
+  return NextResponse.json({ ok: true, reply: trimmed });
 }
