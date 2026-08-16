@@ -87,31 +87,30 @@ export default function PeerReviewSection({
 
   return (
     <div className="space-y-6">
-      <section className="plate">
-        <div className="section-bar">
-          <span className="bar-glyph" />
-          동료 검토
-          {target ? <span className="ml-auto normal-case">상대: {target}</span> : null}
+      <section className="card">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="eyebrow">동료 검토</p>
+          {target ? <span className="caption">상대 · {target}</span> : null}
         </div>
 
         {!target ? (
-          <p className="p-3 text-carbon">검토 상대가 아직 배정되지 않았습니다.</p>
+          <p className="mt-4">검토 상대가 아직 배정되지 않았습니다.</p>
         ) : (
-          <div className="plate-inset m-2 space-y-4 p-3">
+          <div className="mt-6 space-y-6">
             {REVIEW_SOURCE.map(({ mission, keys }) => {
               const data = targetProgress?.missions?.[mission]?.data;
               return (
-                <div key={mission} className="plate-white p-3">
-                  <p className="chrome-label text-inkSoft">{mission} 제출물</p>
+                <div key={mission} className="tile">
+                  <p className="caption">{mission} 제출물</p>
                   {!data ? (
-                    <p className="mt-2 text-ink">상대가 아직 제출하지 않았습니다.</p>
+                    <p className="body-sm mt-3">상대가 아직 제출하지 않았습니다.</p>
                   ) : (
-                    <dl className="mt-2 space-y-2">
+                    <dl className="mt-3 space-y-3">
                       {keys.map((k) =>
                         data[k]?.trim() ? (
                           <div key={k}>
-                            <dt className="chrome-label text-inkSoft">{k}</dt>
-                            <dd className="whitespace-pre-wrap text-ink">{data[k]}</dd>
+                            <dt className="caption">{k}</dt>
+                            <dd className="body-sm mt-1 whitespace-pre-wrap">{data[k]}</dd>
                           </div>
                         ) : null,
                       )}
@@ -121,17 +120,17 @@ export default function PeerReviewSection({
               );
             })}
 
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {CHECKLIST_ITEMS.map((item) => (
                 <li key={item.key}>
-                  <label className="flex items-center gap-2 text-ink">
+                  <label className="flex items-center gap-3">
                     <input
                       type="checkbox"
                       checked={checklist[item.key] === true}
                       onChange={(e) =>
                         setChecklist((prev) => ({ ...prev, [item.key]: e.target.checked }))
                       }
-                      className="h-4 w-4 accent-signal"
+                      className="h-5 w-5 accent-black"
                     />
                     {item.label}
                   </label>
@@ -140,57 +139,49 @@ export default function PeerReviewSection({
             </ul>
 
             <label className="block">
-              <span className="link-bold">코멘트 한 줄</span>
+              <span className="body-lg link-strong">코멘트 한 줄</span>
               <textarea
-                className="text-input mt-1"
+                className="text-input mt-2"
                 rows={2}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
             </label>
 
+            {/* 이 화면의 검정 알약은 미션 제출 버튼 하나다. 여기는 보조로 둔다. */}
             <button
               type="button"
               onClick={save}
               disabled={saving}
-              className="btn-signal"
+              className="btn-secondary"
             >
               {saving ? "저장하는 중" : saved ? "저장됨" : "검토 저장"}
             </button>
-            {saveError ? (
-              <p className="bg-brand px-3 py-2 font-bold text-white">{saveError}</p>
-            ) : null}
+            {saveError ? <p className="body-sm link-strong">{saveError}</p> : null}
           </div>
         )}
       </section>
 
-      <section className="plate">
-        <div className="section-bar">
-          <span className="bar-glyph" />
-          내가 받은 검토
-        </div>
+      <section className="card">
+        <p className="eyebrow">내가 받은 검토</p>
         {received.length === 0 ? (
-          <p className="p-3 text-carbon">아직 받은 검토가 없습니다.</p>
+          <p className="mt-4">아직 받은 검토가 없습니다.</p>
         ) : (
-          <ul className="plate-inset m-2 space-y-3 p-3">
+          <ul className="mt-6 space-y-5">
             {received.map((r) => (
-              <li key={r.reviewer} className="plate-white p-3">
-                <p className="chrome-label text-inkSoft">{r.reviewer}</p>
-                <ul className="mt-2 space-y-1 text-ink">
+              <li key={r.reviewer} className="tile">
+                <p className="caption">{r.reviewer}</p>
+                <ul className="body-sm mt-3 space-y-1">
                   {CHECKLIST_ITEMS.map((item) => (
-                    <li key={item.key}>
-                      <span
-                        className={
-                          r.checklist?.[item.key] ? "font-bold text-brand" : "text-inkSoft"
-                        }
-                      >
-                        {r.checklist?.[item.key] ? "●" : "○"}
+                    <li key={item.key} className={r.checklist?.[item.key] ? "link-strong" : ""}>
+                      <span className={r.checklist?.[item.key] ? "text-success" : ""}>
+                        {r.checklist?.[item.key] ? "✓" : "○"}
                       </span>{" "}
                       {item.label}
                     </li>
                   ))}
                 </ul>
-                {r.comment ? <p className="mt-2 text-ink">{r.comment}</p> : null}
+                {r.comment ? <p className="mt-3">{r.comment}</p> : null}
               </li>
             ))}
           </ul>

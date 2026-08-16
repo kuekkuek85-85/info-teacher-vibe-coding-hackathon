@@ -270,18 +270,6 @@ components:
     padding: 64px 32px
 ---
 
-## 이 저장소에서의 예외 (2026-08-16)
-
-원본 스펙을 그대로 따르지 않는 자리를 이유와 함께 적어 둔다. 예외를 늘릴 때는 여기에 추가한다.
-
-1. **히어로에 사진과 제품 목업을 넣지 않는다.** 이 앱에는 쓸 이미지가 없고, 참가자 화면에 임의 이미지를 넣는 것이 수업에 도움이 되지 않는다. 색 블록 위 타이포만으로 간다.
-2. **디스플레이 크기를 좁은 화면에서 줄인다.** `display-xl` 은 48px 에서 시작해 768px 이상에서 스펙 값 86px 로, `display-lg` 는 40px 에서 시작해 64px 로 올린다. 한글은 같은 글자 수에서 폭을 더 먹어 좁은 화면에서 넘친다.
-3. **마젠타 버튼과 배지의 글자는 흰색이 아니라 검정이다.** 스펙의 `button-magenta-promo` 는 흰 글자를 지정하지만 `#ff3d8b` 위의 흰 글자는 대비가 3.34:1 이라 본문 기준에 못 미친다. 배경색은 그대로 두고 글자만 바꿨다.
-4. **상단바를 720px 에서 접고, 전체 화면 오버레이 대신 작은 드롭다운을 쓴다.** 스펙은 960px 접힘과 full-canvas 오버레이를 요구한다. 이 앱의 상단 링크는 광장과 만든 과정 둘뿐이라 화면을 다 덮을 이유가 없고, 960px 은 이 링크 수에 비해 너무 이르다. 참가자 이름은 560px 아래에서 숨기고 나가기 알약만 남겨 좁은 화면에서도 넘치지 않게 했다.
-5. **색 블록 클래스 이름은 `.color-block` 이다.** `.block` 은 Tailwind 의 display 유틸리티와 겹쳐서, 같은 이름을 쓰면 `className="block"` 인 폼 라벨마다 48px 패딩이 붙는다.
-
-버튼 최소 높이 44px, 입력 48px, 표의 기호 버튼 44×44px 을 지킨다. 스펙의 Responsive 절이 요구하는 사항이다.
-
 ## Overview
 
 Figma's marketing canvas is, at the system level, an editor-clean black-and-white frame. The chrome — top nav, body type, footer, primary CTA — is monochrome. Headlines are oversized `{typography.display-xl}` set in `figmaSans` with aggressive negative tracking, body copy hovers around weight 320–340 of the same variable family, and small mono `{typography.eyebrow}` and `{typography.caption}` labels (figmaMono, all-caps, positive tracking) act as section markers. Every CTA is a pill — `{rounded.pill}` — and the primary action across the entire site is the same black `{components.button-primary}` paired with the same white `{components.button-secondary}`.

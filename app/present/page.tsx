@@ -45,8 +45,8 @@ export default function PresentPage() {
 
   if (order.length === 0) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-4">
-        <p className="plate p-4 text-carbon">발표 순서가 아직 정해지지 않았습니다.</p>
+      <main className="flex min-h-screen items-center justify-center px-6">
+        <p className="body-lg">발표 순서가 아직 정해지지 않았습니다.</p>
       </main>
     );
   }
@@ -58,51 +58,49 @@ export default function PresentPage() {
   const oneline = p?.missions?.m2?.data?.oneline;
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col justify-center px-6 py-10">
-      <div className="plate p-1">
-        <div className="bg-gamesRed px-6 py-8">
-          <p className="chrome-label text-white">
-            발표 {index + 1} / {order.length}
-          </p>
-          <p className="wordmark mt-2 text-[56px]">{name}</p>
-          {oneline ? (
-            <p className="mt-4 text-[15px] font-bold text-white">{oneline}</p>
-          ) : null}
-        </div>
+    <main className="mx-auto flex min-h-screen max-w-[1000px] flex-col justify-center px-6 py-12">
+      <div className="color-block bg-blockNavy">
+        <p className="eyebrow text-inverseInk">
+          발표 {index + 1} / {order.length}
+        </p>
+        <h1 className="display-xl mt-4 text-inverseInk">{name}</h1>
+        {oneline ? (
+          <p className="subhead mt-6 text-inverseInk">{oneline}</p>
+        ) : null}
       </div>
 
-      <div className="plate mt-3 p-4">
+      <div className="mt-10">
         {m7?.deploy_url ? (
           <a
             href={m7.deploy_url}
             target="_blank"
             rel="noreferrer"
-            className="link-bold break-all text-[22px]"
+            className="link-strong break-all text-[26px] underline"
           >
-            {m7.deploy_url} ▶
+            {m7.deploy_url}
           </a>
         ) : (
-          <p className="text-carbon">배포 URL이 아직 없습니다.</p>
+          <p className="body-lg">배포 URL이 아직 없습니다.</p>
         )}
         {m8?.commit_msg ? (
-          <p className="mt-4 text-carbon">커밋 메시지: {m8.commit_msg}</p>
+          <p className="body-lg mt-5">커밋 메시지: {m8.commit_msg}</p>
         ) : null}
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-10 flex gap-3">
         <button
           type="button"
-          className="btn-carbon"
+          className="btn-secondary"
           onClick={() => setIndex((i) => Math.max(i - 1, 0))}
         >
-          ◀ 이전
+          이전
         </button>
         <button
           type="button"
-          className="btn-signal"
+          className="btn-primary"
           onClick={() => setIndex((i) => Math.min(i + 1, order.length - 1))}
         >
-          다음 ▶
+          다음
         </button>
       </div>
     </main>

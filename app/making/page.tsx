@@ -27,43 +27,36 @@ export default function MakingPage() {
   return (
     <>
       <TopNav />
-      <main className="mx-auto max-w-[820px] px-3 pb-24 pt-3">
-        <div className="plate p-1">
-          <div className="bg-lavender px-5 py-7">
-            <p className="wordmark text-[30px]">이렇게 만들었어요</p>
-          </div>
+      <main className="mx-auto max-w-[860px] px-6 pb-32 pt-12">
+        <div className="color-block bg-blockLilac">
+          <p className="eyebrow">만든 과정</p>
+          <h1 className="display-lg mt-4">이렇게 만들었어요</h1>
         </div>
 
-        <div className="mt-3 grid gap-2 min-[810px]:grid-cols-2">
+        <div className="mt-12 grid gap-6 min-[810px]:grid-cols-2">
           {PIPELINE.map((p) => (
-            <div key={p.step} className="plate-raised p-3">
-              <p className="chrome-label text-inkSoft">{p.step}</p>
-              <p className="wordmark-sm mt-1 text-[18px]">{p.who}</p>
-              <p className="mt-2 text-carbon">{p.detail}</p>
+            <div key={p.step} className="card">
+              <p className="caption">{p.step}</p>
+              <p className="card-title mt-3">{p.who}</p>
+              <p className="body-sm mt-2">{p.detail}</p>
             </div>
           ))}
         </div>
 
-        <section className="plate md mt-3 bg-surface p-3 text-ink">
+        <section className="md mt-16">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{making}</ReactMarkdown>
         </section>
 
-        <section className="plate mt-3">
-          <div className="section-bar">
-            <span className="bar-glyph" />
-            검토 기록
-          </div>
-          <div className="md m-2 bg-surface p-3 text-ink">
+        <section className="mt-16">
+          <p className="eyebrow">검토 기록</p>
+          <div className="md mt-4">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{reviewLog}</ReactMarkdown>
           </div>
         </section>
 
-        <section className="plate mt-3">
-          <div className="section-bar">
-            <span className="bar-glyph" />
-            PRD 원문
-          </div>
-          <div className="md m-2 bg-surface p-3 text-ink">
+        <section className="mt-16">
+          <p className="eyebrow">PRD 원문</p>
+          <div className="md mt-4">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{prd}</ReactMarkdown>
           </div>
         </section>

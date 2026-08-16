@@ -48,27 +48,18 @@ export default function EnterGate({
   };
 
   return (
-    <main className="mx-auto max-w-[560px] px-3 py-10">
-      {/* 히어로 판. 라벤더 필드 위에 외곽선 워드마크가 올라간다. */}
-      <div className="plate p-1">
-        <div className="bg-lavender px-6 py-10 text-center">
-          <p className="wordmark text-[40px]">해커톤 베이스캠프</p>
-          <p className="mt-3 font-bold text-carbon">
-            2026 정보 교사 바이브 코딩 역량강화 워크숍
-          </p>
-        </div>
-      </div>
+    <main className="mx-auto max-w-[720px] px-6 py-16">
+      {/* 흰 캔버스 위의 사설란. 색은 아래 블록 하나만 쓴다. */}
+      <p className="eyebrow">2026 정보 교사 바이브 코딩 역량강화 워크숍</p>
+      <h1 className="display-xl mt-4">해커톤 베이스캠프</h1>
 
-      <div className="plate mt-4">
-        <div className="section-bar">
-          <span className="bar-glyph" />
-          입장
-        </div>
-        <form onSubmit={submit} className="plate-inset m-2 space-y-3 p-4">
+      <div className="color-block mt-12 bg-blockLime">
+        <p className="eyebrow">입장</p>
+        <form onSubmit={submit} className="mt-6 space-y-5">
           <label className="block">
-            <span className="link-bold">이름</span>
+            <span className="body-lg link-strong">이름</span>
             <input
-              className="text-input mt-1"
+              className="text-input mt-2"
               placeholder="명단에 있는 이름"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -76,9 +67,9 @@ export default function EnterGate({
             />
           </label>
           <label className="block">
-            <span className="link-bold">수업 코드</span>
+            <span className="body-lg link-strong">수업 코드</span>
             <input
-              className="text-input mt-1"
+              className="text-input mt-2"
               placeholder="강사가 알려 준 번호"
               value={code}
               onChange={(e) => setCode(e.target.value)}
@@ -86,12 +77,10 @@ export default function EnterGate({
               autoComplete="off"
             />
           </label>
-          <button className="btn-signal w-full" disabled={busy || !name || !code}>
+          <button className="btn-primary w-full" disabled={busy || !name || !code}>
             {busy ? "확인하는 중" : "입장하기"}
           </button>
-          {error ? (
-            <p className="bg-brand px-3 py-2 font-bold text-white">{error}</p>
-          ) : null}
+          {error ? <p className="body-sm link-strong">{error}</p> : null}
         </form>
       </div>
     </main>

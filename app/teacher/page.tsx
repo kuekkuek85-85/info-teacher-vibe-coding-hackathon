@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
+import Modal from "@/components/Modal";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
 import type { Mission, Progress, RosterEntry } from "@/lib/types";
 
@@ -183,18 +184,13 @@ export default function TeacherPage() {
 
   if (!authed) {
     return (
-      <main className="mx-auto max-w-[420px] px-3 py-16">
-        <div className="plate p-1">
-          <div className="bg-systemsTeal px-5 py-7 text-center">
-            <p className="wordmark text-[28px]">운영자 대시보드</p>
-          </div>
-        </div>
-        <div className="plate mt-3">
-          <div className="section-bar">
-            <span className="bar-glyph" />
-            PIN 입력
-          </div>
-          <form onSubmit={verify} className="plate-inset m-2 space-y-3 p-4">
+      <main className="mx-auto max-w-[560px] px-6 py-20">
+        <p className="eyebrow">운영자</p>
+        <h1 className="display-lg mt-3">대시보드</h1>
+
+        <div className="color-block mt-10 bg-blockNavy">
+          <p className="eyebrow text-inverseInk">PIN 입력</p>
+          <form onSubmit={verify} className="mt-6 space-y-4">
             <input
               className="text-input"
               type="password"
@@ -202,11 +198,11 @@ export default function TeacherPage() {
               value={pin}
               onChange={(e) => setPin(e.target.value)}
             />
-            <button className="btn-signal w-full" disabled={busy || !pin}>
+            <button className="btn-on-block w-full" disabled={busy || !pin}>
               {busy ? "확인하는 중" : "들어가기"}
             </button>
             {error ? (
-              <p className="bg-brand px-3 py-2 font-bold text-white">{error}</p>
+              <p className="body-sm link-strong text-inverseInk">{error}</p>
             ) : null}
           </form>
         </div>
@@ -226,22 +222,26 @@ export default function TeacherPage() {
   );
 
   const cell = (p: Progress | undefined, m: Mission) => {
-    if (!m.open) return { mark: "🔒", label: "잠김", tone: "text-mutedIndigo" };
+    // 회색 글자를 만들지 않는다. 굵기와 표면으로 상태를 구분한다.
+    if (!m.open) return { mark: "🔒", label: "잠김", tone: "bg-hairlineSoft" };
     const entry = p?.missions?.[m.id];
     if (entry?.status === "submitted")
-      return { mark: "✓", label: "제출", tone: "font-bold text-brand" };
+      return { mark: "✓", label: "제출", tone: "bg-ink text-canvas" };
     if (entry?.data && Object.values(entry.data).some((v) => v?.trim()))
-      return { mark: "◐", label: "작성 중", tone: "font-bold text-ink" };
-    return { mark: "·", label: "미시작", tone: "text-inkSoft" };
+      return { mark: "◐", label: "작성 중", tone: "bg-blockLilac" };
+    return { mark: "·", label: "미시작", tone: "" };
   };
 
   return (
-    <main className="mx-auto max-w-[1000px] px-3 pb-24 pt-3">
-      <div className="slab flex items-center justify-between px-3 py-2">
-        <span className="nav-link text-navGold">운영자 대시보드</span>
+    <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-12">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="eyebrow">운영자</p>
+          <h1 className="display-lg mt-2">대시보드</h1>
+        </div>
         <button
           type="button"
-          className="btn-amber"
+          className="btn-secondary"
           onClick={() => {
             sessionStorage.removeItem(PIN_KEY);
             setAuthed(false);
@@ -251,20 +251,18 @@ export default function TeacherPage() {
         </button>
       </div>
 
-      {error ? (
-        <p className="mt-2 bg-brand px-3 py-2 font-bold text-white">{error}</p>
-      ) : null}
+      {error ? <p className="body-sm link-strong mt-4">{error}</p> : null}
 
-      <section className="plate mt-3 p-3">
-        <h2 className="chrome-label text-ink">수업 코드</h2>
-        <p className="mt-1 text-carbon">
+      <section className="mt-12">
+        <p className="eyebrow">수업 코드</p>
+        <p className="body-lg mt-3">
           모두가 같은 코드로 들어옵니다. 칠판에 적거나 화면에 띄워 알려 주세요.
         </p>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-5 flex flex-wrap items-center gap-3">
           <button
             type="button"
-            className={codesOpen ? "btn-amber" : "btn-signal"}
+            className={codesOpen ? "btn-secondary" : "btn-primary"}
             onClick={() => setCodesOpen((v) => !v)}
             disabled={!workshopCode && !codesOpen}
           >
@@ -273,7 +271,7 @@ export default function TeacherPage() {
           {codesError ? (
             <button
               type="button"
-              className="btn-amber"
+              className="btn-secondary"
               onClick={loadCodes}
               disabled={codesLoading}
             >
@@ -283,23 +281,23 @@ export default function TeacherPage() {
         </div>
 
         {codesError ? (
-          <p className="mt-3 bg-brand px-3 py-2 font-bold text-white">{codesError}</p>
+          <p className="body-sm link-strong mt-4">{codesError}</p>
         ) : codesLoading && !workshopCode ? (
-          <p className="mt-3 text-carbon">불러오는 중입니다.</p>
+          <p className="body-sm mt-4">불러오는 중입니다.</p>
         ) : null}
 
         {codesOpen && workshopCode ? (
-          <div className="plate-white mt-3 px-6 py-8 text-center">
-            <p className="wordmark text-[64px] tracking-[8px] min-[600px]:text-[88px]">
+          <div className="color-block mt-6 bg-blockLime text-center">
+            <p className="display-xl" style={{ letterSpacing: "0.04em" }}>
               {workshopCode}
             </p>
           </div>
         ) : null}
       </section>
 
-      <section className="plate mt-3 p-3">
-        <h2 className="chrome-label text-ink">미션 열기</h2>
-        <div className="mt-2 flex flex-wrap gap-2">
+      <section className="mt-16">
+        <p className="eyebrow">미션 열기</p>
+        <div className="mt-4 flex flex-wrap gap-3">
           {missions.map((m) => (
             <button
               key={m.id}
@@ -313,17 +311,23 @@ export default function TeacherPage() {
                   call("openMission", { missionId: m.id });
                 }
               }}
-              className={m.open ? "btn-signal" : "btn-carbon"}
+              // 여덟 개가 나란히 서는 자리다. 검정 채움은 주요 동작 하나에만 쓰고,
+              // 열림과 닫힘은 표면(라임 칩과 흰 알약)으로 구분한다.
+              className={
+                m.open
+                  ? "btn-secondary bg-blockLime"
+                  : "btn-secondary"
+              }
             >
               {m.id} {m.open ? "열림" : "열기"}
             </button>
           ))}
         </div>
-        <div className="mt-3">
+        <div className="mt-5">
           <button
             type="button"
             disabled={busy}
-            className="btn-amber"
+            className="btn-secondary"
             onClick={() => {
               if (!confirm("이미 배정된 검토 상대가 바뀝니다. 계속할까요?")) return;
               call("shuffle");
@@ -334,57 +338,56 @@ export default function TeacherPage() {
         </div>
       </section>
 
-      <section className="plate mt-3 p-3">
-        <h2 className="chrome-label text-ink">막혔어요 큐</h2>
+      <section className="mt-16">
+        <p className="eyebrow">막혔어요 큐</p>
         {stuckList.length === 0 ? (
-          <p className="mt-2 text-carbon">지금 막힌 사람이 없습니다.</p>
+          <p className="body-lg mt-4">지금 막힌 사람이 없습니다.</p>
         ) : (
-          <ul className="mt-2 space-y-2">
-            {stuckList.map((p) => (
-              <li
-                key={p.name}
-                className="flex items-center justify-between gap-3 bg-brand px-3 py-2"
-                style={{
-                  borderTop: "1px solid #ff6b73",
-                  borderBottom: "2px solid #8c000b",
-                }}
-              >
-                <span className="font-bold text-white">
-                  {p.name} · {p.school}
-                </span>
-                <button
-                  type="button"
-                  className="btn-amber"
-                  onClick={() => call("resolveStuck", { name: p.name })}
+          // 색 블록은 목록 전체를 감싸는 하나다. 사람마다 판을 반복하지 않는다.
+          <div className="color-block mt-4 bg-blockPink">
+            <ul className="space-y-4">
+              {stuckList.map((p) => (
+                <li
+                  key={p.name}
+                  className="flex flex-wrap items-center justify-between gap-4"
                 >
-                  해제
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <span className="card-title">
+                    {p.name} · {p.school}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn-on-block"
+                    onClick={() => call("resolveStuck", { name: p.name })}
+                  >
+                    해제
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
       </section>
 
-      <section className="plate mt-3 overflow-x-auto p-3">
-        <h2 className="chrome-label text-ink">진행 현황</h2>
-        <table className="mt-2 w-full min-w-[620px]">
+      <section className="mt-16 overflow-x-auto">
+        <p className="eyebrow">진행 현황</p>
+        <table className="mt-4 w-full min-w-[720px]">
           <thead>
-            <tr className="bg-canvasSoft">
-              <th className="chrome-label border border-hairline px-2 py-1 text-left">
+            <tr>
+              <th className="caption border-b border-hairline px-2 py-3 text-left">
                 이름
               </th>
               {missions.map((m) => (
                 <th
                   key={m.id}
-                  className="chrome-label border border-hairline px-1 py-1 text-center"
+                  className="caption border-b border-hairline px-1 py-3 text-center"
                 >
                   {m.id}
                 </th>
               ))}
-              <th className="chrome-label border border-hairline px-2 py-1 text-left">
+              <th className="caption border-b border-hairline px-2 py-3 text-left">
                 검토 상대
               </th>
-              <th className="chrome-label border border-hairline px-2 py-1 text-right">
+              <th className="caption border-b border-hairline px-2 py-3 text-right">
                 입장
               </th>
             </tr>
@@ -393,17 +396,20 @@ export default function TeacherPage() {
             {roster.map((r) => {
               const p = people[r.name];
               return (
-                <tr key={r.name} className="bg-surface">
-                  <td className="border border-hairline px-2 py-1 font-bold text-ink">
+                <tr key={r.name}>
+                  <td className="body-sm link-strong border-b border-hairlineSoft px-2 py-1">
                     {r.name}
                     {r.role === "staff" ? (
-                      <span className="ml-1 micro text-inkSoft">강사</span>
+                      <span className="caption ml-2">강사</span>
                     ) : null}
                   </td>
                   {missions.map((m) => {
                     const c = cell(p, m);
                     return (
-                      <td key={m.id} className="border border-hairline p-0 text-center">
+                      <td
+                        key={m.id}
+                        className="border-b border-hairlineSoft p-0 text-center"
+                      >
                         <button
                           type="button"
                           className={`flex h-11 w-11 items-center justify-center ${c.tone}`}
@@ -416,14 +422,14 @@ export default function TeacherPage() {
                       </td>
                     );
                   })}
-                  <td className="border border-hairline px-2 py-1 text-inkSoft">
+                  <td className="body-sm border-b border-hairlineSoft px-2 py-1">
                     {p?.reviewTarget ?? "·"}
                   </td>
-                  <td className="border border-hairline px-2 py-1 text-right">
+                  <td className="border-b border-hairlineSoft px-2 py-1 text-right">
                     {p?.ownerUid ? (
                       <button
                         type="button"
-                        className="link-bold underline"
+                        className="link-strong body-sm underline"
                         onClick={() => {
                           if (
                             !confirm(
@@ -443,24 +449,24 @@ export default function TeacherPage() {
             })}
           </tbody>
         </table>
-        <p className="mt-2 text-carbon">
+        <p className="body-sm mt-4">
           ✓ 제출, ◐ 작성 중, · 미시작, 🔒 잠김. 학생 {students.length}명, 전체{" "}
           {roster.length}명입니다.
         </p>
       </section>
 
-      <section className="plate mt-3 p-3">
-        <h2 className="chrome-label text-ink">발표 순서</h2>
+      <section className="mt-16">
+        <p className="eyebrow">발표 순서</p>
         {deployed.length === 0 ? (
-          <p className="mt-2 text-carbon">아직 m7 제출자가 없습니다.</p>
+          <p className="body-lg mt-4">아직 m7 제출자가 없습니다.</p>
         ) : (
           <>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-3">
               {deployed.map((p) => (
                 <button
                   key={p.name}
                   type="button"
-                  className="btn-carbon"
+                  className="btn-secondary"
                   onClick={() =>
                     setOrder((prev) =>
                       prev.includes(p.name) ? prev : [...prev, p.name],
@@ -471,14 +477,14 @@ export default function TeacherPage() {
                 </button>
               ))}
             </div>
-            <ol className="plate-inset mt-3 space-y-2 p-3">
+            <ol className="mt-6 space-y-3">
               {order.map((n, i) => (
-                <li key={n} className="flex items-center gap-2">
-                  <span className="font-bold text-inkSoft">{i + 1}</span>
-                  <span className="flex-1 font-bold text-ink">{n}</span>
+                <li key={n} className="flex flex-wrap items-center gap-3">
+                  <span className="caption">{i + 1}</span>
+                  <span className="body-lg link-strong flex-1">{n}</span>
                   <button
                     type="button"
-                    className="btn-amber"
+                    className="btn-secondary"
                     onClick={() =>
                       setOrder((prev) => {
                         if (i === 0) return prev;
@@ -492,7 +498,7 @@ export default function TeacherPage() {
                   </button>
                   <button
                     type="button"
-                    className="btn-amber"
+                    className="btn-secondary"
                     onClick={() => setOrder((prev) => prev.filter((x) => x !== n))}
                   >
                     빼기
@@ -503,7 +509,7 @@ export default function TeacherPage() {
             {order.length > 0 ? (
               <button
                 type="button"
-                className="btn-signal mt-3"
+                className="btn-primary mt-6"
                 disabled={busy}
                 onClick={() => call("setPresentOrder", { names: order })}
               >
@@ -515,40 +521,34 @@ export default function TeacherPage() {
       </section>
 
       {detail ? (
-        <div
-          className="fixed inset-0 z-40 flex items-center justify-center bg-carbon/70 p-4"
-          onClick={() => setDetail(null)}
+        <Modal
+          title={`${detail.name} ${detail.mission.id} 제출물`}
+          onClose={() => setDetail(null)}
         >
-          <div
-            className="plate max-h-[80vh] w-full max-w-2xl overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+          <p className="eyebrow">
+            {detail.name} · {detail.mission.id} {detail.mission.title}
+          </p>
+          <dl className="mt-6 space-y-5">
+            {detail.mission.fields.map((f) => {
+              const v = people[detail.name]?.missions?.[detail.mission.id]?.data?.[f.key];
+              return (
+                <div key={f.key}>
+                  <dt className="caption">{f.label}</dt>
+                  <dd className="mt-2 whitespace-pre-wrap">
+                    {v?.trim() ? v : "비어 있습니다"}
+                  </dd>
+                </div>
+              );
+            })}
+          </dl>
+          <button
+            type="button"
+            className="btn-primary mt-8"
+            onClick={() => setDetail(null)}
           >
-            <div className="section-bar">
-              <span className="bar-glyph" />
-              {detail.name} · {detail.mission.id} {detail.mission.title}
-            </div>
-            <dl className="plate-inset m-2 space-y-3 p-3">
-              {detail.mission.fields.map((f) => {
-                const v = people[detail.name]?.missions?.[detail.mission.id]?.data?.[f.key];
-                return (
-                  <div key={f.key}>
-                    <dt className="chrome-label text-inkSoft">{f.label}</dt>
-                    <dd className="mt-1 whitespace-pre-wrap text-ink">
-                      {v?.trim() ? v : "비어 있습니다"}
-                    </dd>
-                  </div>
-                );
-              })}
-            </dl>
-            <button
-              type="button"
-              className="btn-signal mx-2 mb-3"
-              onClick={() => setDetail(null)}
-            >
-              닫기
-            </button>
-          </div>
-        </div>
+            닫기
+          </button>
+        </Modal>
       ) : null}
     </main>
   );

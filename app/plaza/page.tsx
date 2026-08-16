@@ -73,39 +73,37 @@ export default function PlazaPage() {
           setName(null);
         }}
       />
-      <main className="mx-auto max-w-[1000px] px-3 pb-24 pt-3">
-        <div className="plate p-1">
-          <div className="bg-ice px-5 py-6">
-            <p className="wordmark text-[30px]">광장</p>
-            <p className="mt-2 font-bold text-carbon">지금 어디까지 왔는지 보입니다.</p>
-          </div>
+      <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-12">
+        <div className="color-block bg-blockMint">
+          <p className="eyebrow">광장</p>
+          <h1 className="display-lg mt-4">지금 어디까지 왔는지 보입니다</h1>
         </div>
 
         {!ready ? (
-          <p className="plate mt-3 p-3 text-carbon">불러오는 중입니다.</p>
+          <p className="body-lg mt-12">불러오는 중입니다.</p>
         ) : sorted.length === 0 ? (
-          <p className="plate mt-3 p-3 text-carbon">아직 입장한 사람이 없습니다.</p>
+          <p className="body-lg mt-12">아직 입장한 사람이 없습니다.</p>
         ) : (
-          <div className="mt-3 grid gap-2 min-[810px]:grid-cols-2">
+          <div className="mt-12 grid gap-6 min-[810px]:grid-cols-2">
             {sorted.map((p) => {
               const isStaff = p.role === "staff";
               return (
-                <article key={p.name} className="plate-white p-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-ink">{p.name}</span>
-                    <span className="text-inkSoft">{p.school}</span>
+                <article key={p.name} className="card">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="card-title">{p.name}</span>
+                    <span className="body-sm">{p.school}</span>
                     {isStaff ? (
                       <span
-                        className="bg-amber px-2 py-[1px] micro font-bold text-carbon"
-                        style={{ borderRadius: 2 }}
+                        className="caption bg-surfaceSoft px-3 py-1"
+                        style={{ borderRadius: 50 }}
                       >
                         강사
                       </span>
                     ) : null}
                     {p.stuck ? (
                       <span
-                        className="bg-brand px-2 py-[1px] micro font-bold text-white"
-                        style={{ borderRadius: 2 }}
+                        className="caption bg-magenta px-3 py-1 text-ink"
+                        style={{ borderRadius: 50 }}
                       >
                         막혔어요
                       </span>
@@ -113,22 +111,22 @@ export default function PlazaPage() {
                   </div>
 
                   {!isStaff ? (
-                    <div className="mt-2 flex gap-[2px]">
+                    <div className="mt-5 flex gap-1">
                       {missions.map((m) => {
                         const entry = p.missions?.[m.id];
                         const tone = !m.open
-                          ? "bg-mutedIndigo"
+                          ? "bg-hairlineSoft"
                           : entry?.status === "submitted"
-                            ? "bg-signal"
+                            ? "bg-ink"
                             : entry?.data
-                              ? "bg-canvas"
-                              : "bg-platinum";
+                              ? "bg-blockLilac"
+                              : "bg-surfaceSoft";
                         return (
                           <span
                             key={m.id}
                             title={`${m.id} ${m.title}`}
-                            className={`h-3 w-6 ${tone}`}
-                            style={{ border: "1px solid #3d4f97" }}
+                            className={`h-2 w-8 ${tone}`}
+                            style={{ borderRadius: 50 }}
                           />
                         );
                       })}
@@ -136,7 +134,7 @@ export default function PlazaPage() {
                   ) : null}
 
                   {!isStaff ? (
-                    <dl className="mt-2 space-y-2">
+                    <dl className="mt-5 space-y-4">
                       {shown.map((s) => {
                         const mission = missions.find((m) => m.id === s.mission);
                         const entry = p.missions?.[s.mission];
@@ -145,20 +143,20 @@ export default function PlazaPage() {
                         const v = entry.data?.[s.key];
                         if (!field || !v?.trim()) return null;
                         return (
-                          <div key={`${s.mission}.${s.key}`} className="plate-inset p-2">
-                            <dt className="chrome-label text-inkSoft">{field.label}</dt>
+                          <div key={`${s.mission}.${s.key}`}>
+                            <dt className="caption">{field.label}</dt>
                             <dd className="mt-1">
                               {field.type === "url" ? (
                                 <a
                                   href={v}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="link-bold break-all"
+                                  className="link-strong body-sm break-all underline"
                                 >
-                                  {v} ▶
+                                  {v}
                                 </a>
                               ) : (
-                                <span className="whitespace-pre-wrap text-ink">{v}</span>
+                                <span className="body-sm whitespace-pre-wrap">{v}</span>
                               )}
                             </dd>
                           </div>
