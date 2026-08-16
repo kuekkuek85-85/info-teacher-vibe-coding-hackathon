@@ -21,12 +21,20 @@ export default function MissionForm({
   name,
   onSave,
   onSubmit,
+  onValuesChange,
+  slot,
+  slotAfter,
 }: {
   mission: Mission;
   progress: Progress | null;
   name: string;
   onSave: (data: Record<string, string>) => Promise<void>;
   onSubmit: () => Promise<void>;
+  /** 저장을 기다리지 않고 지금 적은 값을 알려 준다 */
+  onValuesChange?: (values: Record<string, string>) => void;
+  /** 칸 사이에 끼울 것. slotAfter 로 지정한 칸 바로 아래에 선다 */
+  slot?: React.ReactNode;
+  slotAfter?: string;
 }) {
   const entry = progress?.missions?.[mission.id];
   const submitted = entry?.status === "submitted";
@@ -68,6 +76,7 @@ export default function MissionForm({
 
     setValues(base);
     initialized.current = true;
+    onValuesChange?.(base);
     if (backup || prefilled) queue(base);
   }, [progress, entry, readBackup, queue, prefillTarget, prefillText]);
 
@@ -75,6 +84,8 @@ export default function MissionForm({
     const next = { ...values, [key]: value };
     setValues(next);
     queue(next);
+    // 카드가 이 값을 바로 받아 간다. 저장을 기다리면 방금 적은 것이 빠진다.
+    onValuesChange?.(next);
   };
 
   const submit = async () => {
@@ -122,7 +133,8 @@ export default function MissionForm({
         ) : null}
 
         {mission.fields.map((field) => (
-          <label key={field.key} className="block">
+          <div key={field.key}>
+          <label className="block">
             <span className="body-lg link-strong">{field.label}</span>
             {field.type === "textarea" ? (
               <textarea
@@ -209,6 +221,9 @@ export default function MissionForm({
               />
             )}
           </label>
+          {/* 카드를 칸 사이에 끼운다. 앞의 칸을 적은 뒤 카드를 쓰는 순서가 있다. */}
+          {slotAfter === field.key ? <div className="mt-6">{slot}</div> : null}
+          </div>
         ))}
       </div>
 

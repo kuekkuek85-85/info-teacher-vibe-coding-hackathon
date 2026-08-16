@@ -1,7 +1,7 @@
 // 프롬프트 카드에 내 제출물이 제대로 들어가는지 확인한다.
 // 실행: node scripts/check-prompt-card.ts
 import { readFileSync } from "node:fs";
-import { buildPromptText } from "../lib/promptCard.ts";
+import { buildPromptText, withDraft } from "../lib/promptCard.ts";
 import type { Mission, Progress } from "../lib/types.ts";
 
 let failures = 0;
@@ -104,7 +104,25 @@ const broken: Mission = {
 };
 check("출처 미션이 없으면 원본 그대로", buildPromptText(broken, missions, null) === m4.promptCard);
 
-// 8. 미션을 옮겨도 앞 카드에서 고친 내용이 따라오면 안 된다.
+// 8. 저장 전에 적은 값도 카드에 들어가야 한다. 같은 미션에서 끌어오면 티가 크다.
+const saved = withData({ problem: "저장된 문장" });
+const live = withDraft(saved, "m3", { problem: "방금 적은 문장", mvp: "방금 적은 MVP" });
+check("얹은 값이 이긴다", live?.missions.m3.data.problem === "방금 적은 문장");
+check("안 얹은 칸은 그대로", live?.missions.m3.data.mvp === "방금 적은 MVP");
+check("원본을 건드리지 않는다", saved.missions.m3.data.problem === "저장된 문장");
+check("빈 초안이면 그대로 돌려준다", withDraft(saved, "m3", {}) === saved);
+check("초안이 없으면 그대로 돌려준다", withDraft(saved, "m3", null) === saved);
+check("문서가 없으면 만들지 않는다", withDraft(null, "m3", { problem: "x" }) === null);
+check(
+  "카드가 얹은 값을 쓴다",
+  buildPromptText(m4, missions, live).includes("방금 적은 문장"),
+);
+check(
+  "적은 적 없는 미션에도 얹힌다",
+  withDraft(saved, "m9", { readme_url: "x" })?.missions.m9.status === "draft",
+);
+
+// 9. 미션을 옮겨도 앞 카드에서 고친 내용이 따라오면 안 된다.
 // 화면 상태라 조립 함수로는 못 잡는다. 두 장치가 사라지면 여기서 잡는다.
 const component = readFileSync(new URL("../components/PromptCard.tsx", import.meta.url), "utf8");
 // 미션 본문은 홈과 미션 화면이 함께 쓴다. 홈에서는 칸을 바꿔도 화면이 안 바뀌므로
@@ -122,6 +140,10 @@ check(
   "제출 양식도 미션마다 새로 만들어진다",
   /<MissionForm\s+key=\{mission\.id\}/.test(detail),
 );
+// 적는 순서가 있는 자리에서는 카드가 칸 사이에 선다
+check("카드를 칸 사이에 끼울 수 있다", detail.includes("slotAfter={mission.promptCardAfter}"));
+check("끼울 때는 위에 또 그리지 않는다", detail.includes("!mission.promptCardAfter ? card"));
+check("미션을 옮기면 얹은 값을 비운다", detail.includes("setDraft(null), [mission.id]"));
 // 카드 머리말은 진행 방식 셋을 모두 처리해야 한다
 for (const [tool, label] of Object.entries({
   human: "옮겨 적을 카드",

@@ -1,6 +1,30 @@
 import type { Mission, Progress } from "./types";
 
 /**
+ * 아직 저장되지 않은 입력을 얹어 준다.
+ * 같은 미션의 값을 카드에 채울 때는 저장을 기다리면 방금 적은 것이 빠진다.
+ */
+export function withDraft(
+  progress: Progress | null,
+  missionId: string,
+  draft: Record<string, string> | null,
+): Progress | null {
+  if (!progress || !draft || Object.keys(draft).length === 0) return progress;
+  const entry = progress.missions?.[missionId];
+  return {
+    ...progress,
+    missions: {
+      ...progress.missions,
+      [missionId]: {
+        ...entry,
+        status: entry?.status ?? "draft",
+        data: { ...(entry?.data ?? {}), ...draft },
+      },
+    },
+  };
+}
+
+/**
  * 프롬프트 카드의 "(붙여넣기)" 자리에 본인 제출물을 채운다.
  * 참가자가 다른 화면을 오가며 복사해 오지 않아도 되게 하려는 것이다.
  */

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -8,7 +9,7 @@ import MissionForm from "@/components/MissionForm";
 import PeerReviewSection from "@/components/PeerReviewSection";
 import PeerToolLinks from "@/components/PeerToolLinks";
 import PromptCard from "@/components/PromptCard";
-import { buildPromptText } from "@/lib/promptCard";
+import { buildPromptText, withDraft } from "@/lib/promptCard";
 import type { Mission, MissionTool, Progress } from "@/lib/types";
 
 const GATE_MISSIONS = new Set(["m5", "m8"]);
@@ -47,6 +48,20 @@ export default function MissionDetail({
   const isGate = GATE_MISSIONS.has(mission.id);
   const tool = mission.tool ?? "human";
 
+  // 같은 미션의 값을 카드에 채우는 자리가 있다. 저장을 기다리면 방금 적은 것이 빠진다.
+  const [draft, setDraft] = useState<Record<string, string> | null>(null);
+  useEffect(() => setDraft(null), [mission.id]);
+
+  const card = mission.promptCard ? (
+    <PromptCard
+      key={mission.id}
+      text={buildPromptText(mission, missions, withDraft(progress, mission.id, draft))}
+      storageKey={`prompt:${name}:${mission.id}`}
+      filled={Boolean(mission.promptFill)}
+      tool={mission.promptTool ?? mission.tool}
+    />
+  ) : null;
+
   return (
     <>
       {/* 이 화면의 색 블록은 여기 하나뿐이다. 아래는 흰 캔버스로 돌아간다. */}
@@ -65,7 +80,7 @@ export default function MissionDetail({
           ) : null}
         </div>
         <h1 className="display-lg mt-4">{mission.title}</h1>
-        <p className="body-lg mt-6">{TOOL_LINE[tool]}</p>
+        <p className="body-lg mt-6">{mission.toolLine ?? TOOL_LINE[tool]}</p>
       </header>
 
       <div className="mt-10 space-y-8">
@@ -75,15 +90,7 @@ export default function MissionDetail({
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{mission.guide}</ReactMarkdown>
         </div>
 
-        {mission.promptCard ? (
-          <PromptCard
-            key={mission.id}
-            text={buildPromptText(mission, missions, progress)}
-            storageKey={`prompt:${name}:${mission.id}`}
-            filled={Boolean(mission.promptFill)}
-            tool={mission.tool}
-          />
-        ) : null}
+        {mission.promptCard && !mission.promptCardAfter ? card : null}
 
         {mission.id === "m8" ? <PeerToolLinks target={progress?.reviewTarget} /> : null}
 
@@ -107,6 +114,9 @@ export default function MissionDetail({
           name={name}
           onSave={onSave}
           onSubmit={onSubmit}
+          onValuesChange={mission.promptCardAfter ? setDraft : undefined}
+          slot={mission.promptCardAfter ? card : undefined}
+          slotAfter={mission.promptCardAfter}
         />
 
         {mission.id === "m5" ? (

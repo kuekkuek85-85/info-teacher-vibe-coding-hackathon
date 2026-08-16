@@ -16,7 +16,12 @@ const check = (label, ok, extra = "") => {
 
 const expected = {
   m1: { order: 1, fields: ["prep", "during", "assess", "feedback"], vis: "private", tool: "human" },
-  m2: { order: 2, fields: ["oneline", "user"], vis: "public", tool: "human" },
+  m2: {
+    order: 2,
+    fields: ["oneline", "user", "grill_changed", "grill_kept"],
+    vis: "public",
+    tool: "human",
+  },
   m3: {
     order: 3,
     fields: ["problem", "mvp", "context", "p1", "stack"],
@@ -155,8 +160,20 @@ check(
   m2.guide.slice(-40),
 );
 
+// m2 캐묻기. 아이디어가 뭉툭한 채로 m3 에 넘어가면 PRD 도 뭉툭해진다.
+check("m2 카드가 캐묻는다", m2.promptCard?.includes("캐물어라"));
+check("m2 카드가 질문만 시킨다", m2.promptCard?.includes("답을 대신 정하지 마라"));
+check("m2 카드가 질문 수를 못 박는다", m2.promptCard?.includes("질문 5개만"));
+check("m2 카드는 대화창으로 간다", m2.promptTool === "chat", m2.promptTool);
+check("m2 단계 자체는 사람이 적는다", m2.tool === "human", m2.tool);
+check("m2 머리말이 카드와 어긋나지 않는다", m2.toolLine?.includes("먼저 직접 적습니다"));
+check(
+  "m2 가 바꾼 것과 안 바꾼 것을 남긴다",
+  ["grill_changed", "grill_kept"].every((k) => m2.fields.some((f) => f.key === k)),
+);
+
 // 프롬프트 카드에 내 제출물이 채워지는지. 자리표시자와 slot 이 어긋나면 안 채워진다.
-for (const [id, sources] of Object.entries({ m4: ["m3"], m5: ["m3", "m4"] })) {
+for (const [id, sources] of Object.entries({ m2: ["m2"], m4: ["m3"], m5: ["m3", "m4"] })) {
   const m = missions.find((x) => x.id === id);
   const fill = m.promptFill;
   check(`${id} promptFill 있음`, Boolean(fill));

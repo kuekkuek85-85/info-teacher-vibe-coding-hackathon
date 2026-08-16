@@ -36,6 +36,12 @@ export interface Mission {
   tool: MissionTool;
   guide: string;
   promptCard?: string;
+  /** 카드를 붙여넣을 곳이 이 단계의 진행 방식과 다를 때 쓴다 */
+  promptTool?: MissionTool;
+  /** 카드를 제출 양식의 이 칸 아래에 끼운다. 적는 순서와 카드 쓰는 순서가 있을 때 */
+  promptCardAfter?: string;
+  /** 색 블록 아래 한 줄. 기본 문장이 이 단계와 안 맞을 때만 적는다 */
+  toolLine?: string;
   /** 프롬프트 카드의 자리표시자에 채울 내 제출물 */
   promptFill?: {
     slot: string;

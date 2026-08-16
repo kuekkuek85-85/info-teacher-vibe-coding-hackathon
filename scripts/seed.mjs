@@ -163,8 +163,27 @@ const missions = [
     session: "2일차 아침",
     tool: "human",
     visibility: "public",
+    // 아이디어는 직접 적는다. 다 적은 뒤에만 AI를 캐묻는 쪽으로 쓴다.
+    toolLine:
+      "먼저 직접 적습니다. 다 적은 뒤에 아래 카드로 AI에게 캐물어 아이디어를 뾰족하게 만듭니다.",
     guide:
-      "한 문장이면 됩니다. 누가, 무엇 때문에 힘든데, 어떤 도구가 있으면 되는지 적어 주세요. 바로 다음 단계에서 이 문장을 PRD로 키우니 완성도는 신경 쓰지 마세요.",
+      "한 문장이면 됩니다. 누가, 무엇 때문에 힘든데, 어떤 도구가 있으면 되는지 적어 주세요. 다 적었으면 아래 카드로 AI에게 캐물어 보세요. 질문 다섯 개만 받고 3분 안에 끝낸 뒤, 바꾼 것과 안 바꾼 것을 남기면 다음 단계의 PRD가 뾰족해집니다.",
+    promptTool: "chat",
+    // 아이디어와 사용자를 적은 바로 다음에 카드가 선다. 그 뒤 두 칸에 결과를 남긴다.
+    promptCardAfter: "user",
+    promptCard: `너는 까다로운 심사위원이다. 아래 아이디어를 캐물어라.
+질문 5개만, 각 한 문장. 답을 대신 정하지 마라. 칭찬 금지.
+1) 이것이 진짜 병목인지 의심되는 지점
+2) 누구의 문제인지 흐린 지점
+3) 이미 있는 도구로 되는 것은 아닌지
+4) 반나절에 만들 수 없어 보이는 지점
+5) 학생 개인정보나 안전에서 걸리는 지점
+--- 내 아이디어 ---
+(붙여넣기)`,
+    promptFill: {
+      slot: "(붙여넣기)",
+      sources: [{ mission: "m2", label: "아이디어", keys: ["oneline", "user"] }],
+    },
     fields: [
       { key: "oneline", label: "아이디어 한 줄", type: "textarea" },
       {
@@ -173,6 +192,18 @@ const missions = [
         type: "roles",
         options: ["학생", "교사", "학부모"],
         placeholder: "이 사람이 무엇을 하는지 한 줄로",
+      },
+      {
+        key: "grill_changed",
+        label: "캐물음을 듣고 바꾼 것",
+        type: "textarea",
+        placeholder: "예) 대상을 전교생에서 우리 반 한 반으로 줄였습니다",
+      },
+      {
+        key: "grill_kept",
+        label: "안 바꾼 것과 그 이유",
+        type: "textarea",
+        placeholder: "전부 바꿨다면 스스로 판단하기를 멈춘 것입니다",
       },
     ],
     carryover: [],
