@@ -252,8 +252,14 @@ const missions = [
       fromKey: "test_design",
     },
     fields: [
-      { key: "first_prompt", label: "내가 보낸 첫 지시문", type: "textarea" },
-      { key: "red_count", label: "실패한 테스트 개수", type: "text" },
+      {
+        key: "first_prompt",
+        label: "내가 보낸 첫 지시문",
+        type: "textarea",
+        placeholder:
+          "예) Next.js 기반 '형성평가 채점 도우미' 프로젝트를 시작할 거야. 아래 테스트 케이스 설계를 실패하는 테스트 코드로만 작성해줘. 구현 코드는 아직 쓰지 마. 테스트 러너 설정까지만. 커밋과 푸시는 내가 직접 할 테니 너는 하지 마.",
+      },
+      { key: "red_count", label: "실패한 테스트 개수", type: "text", placeholder: "예) 5" },
     ],
     carryover: [{ fromMission: "m4", fromKey: "test_design", label: "m4 테스트 케이스 설계" }],
   },
@@ -270,7 +276,12 @@ const missions = [
       { key: "green_count", label: "통과한 테스트 개수", type: "text" },
       { key: "deploy_url", label: "배포 URL", type: "url" },
       { key: "repo_url", label: "깃허브 저장소 URL", type: "url" },
-      { key: "remaining", label: "남은 일 3가지 (오후 계획)", type: "textarea" },
+      {
+        key: "remaining",
+        label: "남은 일 (추후 계획)",
+        type: "textarea",
+        placeholder: "예) 로그인은 아직 없습니다. 채점 결과를 저장하지 못합니다.",
+      },
     ],
     carryover: [],
   },

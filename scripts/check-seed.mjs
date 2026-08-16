@@ -136,6 +136,17 @@ check(
 const m7 = missions.find((m) => m.id === "m7");
 const m8 = missions.find((m) => m.id === "m8");
 check("m7 안내가 커밋·푸시를 포함한다", m7.guide.includes("Github 커밋, 푸시까지"));
+check(
+  "m6 첫 지시문 칸에 예시가 있다",
+  missions
+    .find((m) => m.id === "m6")
+    .fields.find((f) => f.key === "first_prompt")
+    .placeholder?.startsWith("예)"),
+);
+check(
+  "m7 남은 일 칸 이름",
+  m7.fields.find((f) => f.key === "remaining").label === "남은 일 (추후 계획)",
+);
 check("m8 안내가 리팩토링으로 시작한다", m8.guide.startsWith("코드의 리팩토링을 검토받고"));
 check("m8 안내에 지난 일정이 없다", !m8.guide.includes("오후 스프린트 3"));
 check(

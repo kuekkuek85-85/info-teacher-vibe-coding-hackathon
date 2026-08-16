@@ -130,6 +130,7 @@ const PHRASES = [
   "Github 커밋, 푸시까지 가고, 배포까지 갑니다",
   "코드의 리팩토링을 검토받고",
   "내 동료의 도구를 써 보고 남긴 한 줄",
+  "남은 일 (추후 계획)",
 ];
 for (const phrase of PHRASES) {
   check(`원고에 "${phrase.slice(0, 12)}…" 이 있다`, manuscript.includes(phrase));
