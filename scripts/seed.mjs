@@ -33,23 +33,57 @@ const app =
 const db = getFirestore(app);
 
 // ─────────────────────────────────────────────────────────────
-// 1. 명단 — 실명단 확보 전 자리 데이터
-//    교체 방법: 아래 배열의 name·school 을 실제 값으로 바꾸고 다시 실행한다.
-//    동명이인이 있으면 name 을 "이름(소속)" 형식으로 적는다.
+// 1. 명단
+//    실명단은 저장소에 두지 않는다. 공개 이력에 남으면 지울 수 없다.
+//    roster.local.json 을 만들어 두면 그것을 읽고, 없으면 아래 자리 데이터를 쓴다.
+//    형식: [{ "name": "이름", "school": "소속", "role": "student" }]
+//    동명이인이 생기면 name 을 "이름(소속)" 형식으로 적는다.
+//    강사로 오신 분도 미션을 함께 밟으면 role 을 student 로 적는다.
 // ─────────────────────────────────────────────────────────────
-const roster = [
-  ...Array.from({ length: 17 }, (_, i) => ({
-    name: `수강생${String(i + 1).padStart(2, "0")}`,
-    school: "소속 미입력",
-    role: "student",
-  })),
-  { name: "이승엽", school: "장평중", role: "staff" },
-  ...Array.from({ length: 4 }, (_, i) => ({
-    name: `강사${String(i + 1).padStart(2, "0")}`,
-    school: "소속 미입력",
-    role: "staff",
-  })),
-];
+const PLACEHOLDER_ROSTER = Array.from({ length: 22 }, (_, i) => ({
+  name: `수강생${String(i + 1).padStart(2, "0")}`,
+  school: "소속 미입력",
+  role: "student",
+}));
+
+function loadRoster() {
+  let raw;
+  try {
+    raw = readFileSync(new URL("../roster.local.json", import.meta.url), "utf8");
+  } catch {
+    // 파일이 사라진 채로 자리 데이터를 밀면 실명단과 진행 기록이 통째로 지워진다.
+    // 워크숍 당일에 이 사고가 나면 되돌릴 수 없다. 그래서 멈춘다.
+    if (!process.argv.includes("--placeholder")) {
+      console.error(
+        "roster.local.json 이 없습니다.\n" +
+          "실제 명단으로 시딩하려면 저장소 루트에 이 파일을 만들어 주세요.\n" +
+          '형식: [{ "name": "이름", "school": "소속", "role": "student" }]\n' +
+          "자리 데이터로 밀어도 된다면 --placeholder 를 붙여 다시 실행하세요.",
+      );
+      process.exit(1);
+    }
+    console.log("자리 데이터로 시딩합니다. 기존 실명단이 있으면 지워집니다.");
+    return PLACEHOLDER_ROSTER;
+  }
+
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error("roster.local.json 이 비어 있습니다. 배열로 적어 주세요.");
+  }
+  for (const person of parsed) {
+    if (!person?.name || !person?.school) {
+      throw new Error(`roster.local.json 에 name 이나 school 이 빠진 줄이 있습니다: ${JSON.stringify(person)}`);
+    }
+    if (person.role !== "student" && person.role !== "staff") {
+      throw new Error(`${person.name} 의 role 은 student 나 staff 여야 합니다.`);
+    }
+  }
+
+  console.log(`roster.local.json 에서 ${parsed.length}명을 읽었습니다.`);
+  return parsed;
+}
+
+const roster = loadRoster();
 
 // ─────────────────────────────────────────────────────────────
 // 1-2. 예비 검토자 겸 테스트 계정
@@ -61,6 +95,19 @@ const roster = [
 const extraAccounts = [{ name: "홍길동", school: "예비 검토자", role: "staff" }];
 
 roster.push(...extraAccounts);
+
+// 겹침은 예비 검토자를 합친 뒤에 본다. 참가자 이름이 홍길동이면
+// 먼저 검사해도 뒤에서 staff 계정에 덮여 그 사람 자리가 사라진다.
+const allNames = roster.map((p) => p.name);
+const duplicated = allNames.find((n, i) => allNames.indexOf(n) !== i);
+if (duplicated) {
+  console.error(
+    `이름이 겹칩니다: ${duplicated}\n` +
+      '참가자끼리 겹치면 "이름(소속)" 형식으로 나눠 적고,\n' +
+      "예비 검토자와 겹치면 .env 의 FALLBACK_REVIEWER_NAME 과 함께 다른 이름으로 바꿔 주세요.",
+  );
+  process.exit(1);
+}
 
 // 입장 코드는 워크숍 전체가 하나를 함께 쓴다. .env 의 WORKSHOP_CODE 다.
 // 개인별 코드를 쓰던 흔적(codes 컬렉션)은 시딩할 때 지운다.
@@ -428,8 +475,19 @@ async function main() {
   }
   // 개인별 코드는 더 쓰지 않는다. 남아 있으면 전부 지운다.
   for (const d of oldCodes.docs) batch.delete(d.ref);
+  const byName = new Map(roster.map((p) => [p.name, p]));
   for (const d of oldProgress.docs) {
-    if (!currentNames.has(d.id)) batch.delete(d.ref);
+    if (!currentNames.has(d.id)) {
+      batch.delete(d.ref);
+      continue;
+    }
+    // 이미 입장한 사람의 소속이나 역할이 바뀌면 여기서 맞춘다.
+    // 안 맞추면 다시 입장할 때까지 옛 값이 광장과 강사 화면에 남는다.
+    const person = byName.get(d.id);
+    const now = d.data();
+    if (now.school !== person.school || now.role !== person.role) {
+      batch.update(d.ref, { school: person.school, role: person.role });
+    }
   }
   for (const d of oldReviews.docs) {
     const v = d.data();
