@@ -1,6 +1,7 @@
 import { clampIndex, type Deck } from "./decks.ts";
 // 확장자를 붙여야 검사 스크립트가 이 파일을 그대로 실행할 수 있다
 import m0Notes from "./notes/m0.ts";
+import m1Notes from "./notes/m1.ts";
 import m2Notes from "./notes/m2.ts";
 import m3Notes from "./notes/m3.ts";
 import m4Notes from "./notes/m4.ts";
@@ -17,6 +18,7 @@ import m9Notes from "./notes/m9.ts";
  */
 const NOTES: Record<string, string[]> = {
   m0: m0Notes,
+  m1: m1Notes,
   m2: m2Notes,
   m3: m3Notes,
   m4: m4Notes,

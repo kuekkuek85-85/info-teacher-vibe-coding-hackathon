@@ -12,6 +12,7 @@ export interface Deck {
  */
 export const DECKS: Deck[] = [
   { id: "m0", title: "바이브 코딩의 필요성", count: 6 },
+  { id: "m1", title: "애자일과 MVP", count: 2 },
   { id: "m2", title: "바이브 코딩 목적과 타겟 유저", count: 1 },
   { id: "m3", title: "PRD", count: 1 },
   { id: "m4", title: "구현 계획", count: 2 },

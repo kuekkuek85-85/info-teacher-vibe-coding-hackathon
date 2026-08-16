@@ -17,6 +17,7 @@ check("m0 자료가 있다", Boolean(m0));
 check("m0 제목", m0?.title === "바이브 코딩의 필요성", m0?.title);
 // 자료를 더할 때마다 여기 한 줄 늘린다. 목록과 제목이 어긋나면 잡힌다.
 const EXPECTED: Record<string, string> = {
+  m1: "애자일과 MVP",
   m2: "바이브 코딩 목적과 타겟 유저",
   m3: "PRD",
   m4: "구현 계획",
