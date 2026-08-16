@@ -5,7 +5,7 @@ out/
 !.env.example
 scripts/codes-출력.csv
 
-# 강의 자료에 학생 학번과 질문 원문이 들어 있다. 공개 배포에 올리지 않는다.
-public/**/*.pdf
+# public 아래 파일은 배포 URL 로 누구나 내려받는다.
+# 학생 자료를 넣을 때는 자료 소유자가 익명화 수준과 공개 범위를 확인한 뒤에 넣는다.
 *.tsbuildinfo
 next-env.d.ts

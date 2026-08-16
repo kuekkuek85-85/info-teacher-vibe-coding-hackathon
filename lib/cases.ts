@@ -12,8 +12,8 @@ export interface CaseItem {
   urlLabel?: string;
   /**
    * 저장소에 함께 둘 자료. 형식과 용량을 함께 적는다.
-   * 학생 학번이나 질문 원문이 들어간 자료는 여기에 넣지 않는다.
-   * 공개 URL 이라 누구나 내려받을 수 있다.
+   * 공개 URL 이라 누구나 내려받는다. 학생 자료가 들어가는 경우
+   * 자료 소유자가 익명화 수준과 공개 범위를 확인한 뒤에 넣는다.
    */
   file?: { label: string; url: string; meta: string };
   /** 언론 보도 같은 참고 자료 */
@@ -30,6 +30,11 @@ export const CASES: CaseItem[] = [
     detail:
       "스크래치 오류를 만나면 15분은 혼자 붙듭니다. 그 뒤에야 봇에게 묻고, 질문은 전부 기록에 남습니다. 문제가 있는 블록이 뭐냐고 묻던 학생이 왜 그 블록이라고 판단했냐고 되묻는 데까지 갑니다.",
     maker: "코드쌤봇 제작 · 장평중 정아림",
+    file: {
+      label: "강의 슬라이드",
+      url: "/codessam-bot-slides.pdf",
+      meta: "PDF · 19쪽 · 2.1MB · 새 창",
+    },
     tone: "bg-blockLime",
   },
   {

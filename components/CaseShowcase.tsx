@@ -47,19 +47,6 @@ export default function CaseShowcase({
             <p className="body-sm mt-3">{c.detail}</p>
             {c.maker ? <p className="caption mt-3">{c.maker}</p> : null}
 
-            {c.url ? (
-              <p className="mt-4">
-                <a
-                  href={c.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="link-strong body-sm break-all underline"
-                >
-                  {c.urlLabel}
-                  <span className="caption ml-2">새 창</span>
-                </a>
-              </p>
-            ) : null}
             {c.file ? (
               <p className="mt-4">
                 <a
@@ -71,6 +58,20 @@ export default function CaseShowcase({
                 >
                   {c.file.label}
                   <span className="caption ml-3">{c.file.meta}</span>
+                </a>
+              </p>
+            ) : null}
+
+            {c.url ? (
+              <p className="mt-4">
+                <a
+                  href={c.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="link-strong body-sm break-all underline"
+                >
+                  {c.urlLabel}
+                  <span className="caption ml-2">새 창</span>
                 </a>
               </p>
             ) : null}
