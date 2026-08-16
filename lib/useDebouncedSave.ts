@@ -31,7 +31,11 @@ export function useDebouncedSave(
       await saveRef.current(snapshot);
       if (pending.current === snapshot) {
         pending.current = null;
-        localStorage.removeItem(key);
+        try {
+          localStorage.removeItem(key);
+        } catch {
+          // 저장소를 못 써도 서버에는 이미 저장됐다. 오류로 처리하지 않는다.
+        }
       }
       setStatus("saved");
       setSavedAt(

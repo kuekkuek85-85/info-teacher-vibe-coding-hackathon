@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ensureAnonAuth } from "@/lib/firebase";
-import { saveSession } from "@/lib/session";
+import { isPersistent, saveSession } from "@/lib/session";
 
 export default function EnterGate({
   onEntered,
@@ -13,6 +13,13 @@ export default function EnterGate({
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [noStorage, setNoStorage] = useState(false);
+
+  // 저장소를 못 쓰는 브라우저면 새로고침할 때마다 다시 입장해야 한다.
+  // 조용히 넘어가면 참가자가 원인을 모른 채 헤맨다.
+  useEffect(() => {
+    setNoStorage(!isPersistent());
+  }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +88,12 @@ export default function EnterGate({
             {busy ? "확인하는 중" : "입장하기"}
           </button>
           {error ? <p className="body-sm link-strong">{error}</p> : null}
+          {noStorage ? (
+            <p className="body-sm">
+              이 브라우저는 저장을 막아 두었습니다. 지금은 들어갈 수 있지만 새로고침하면
+              이름과 코드를 다시 넣어야 합니다.
+            </p>
+          ) : null}
         </form>
       </div>
     </main>

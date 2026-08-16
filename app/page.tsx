@@ -1,37 +1,73 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import CaseShowcase from "@/components/CaseShowcase";
 import EnterGate from "@/components/EnterGate";
 import ExpiredNotice from "@/components/ExpiredNotice";
 import MissionCard from "@/components/MissionCard";
+import Modal from "@/components/Modal";
 import Stepper from "@/components/Stepper";
 import StuckButton from "@/components/StuckButton";
 import TopNav from "@/components/TopNav";
-import { clearSession, getSavedName, getSavedRole } from "@/lib/session";
+import {
+  clearSession,
+  getSavedName,
+  getSavedRole,
+  hasSeenCases,
+  markCasesSeen,
+} from "@/lib/session";
 import { useProgress } from "@/lib/useProgress";
 
 export default function HomePage() {
   const [name, setName] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
+  const [casesOpen, setCasesOpen] = useState(false);
   const { progress, missions, ready, expired, setStuck } = useProgress(name);
 
   useEffect(() => {
     setName(getSavedName());
     setRole(getSavedRole());
     setRestored(true);
+
+    // 들어오면 사례를 한 번 띄운다. 닫고 나면 다시 막아서지 않는다.
+    // 하루 종일 미션을 쓰는 화면이라 매번 가리면 일이 안 된다.
+    if (!hasSeenCases()) setCasesOpen(true);
   }, []);
+
+  const closeCases = () => {
+    setCasesOpen(false);
+    markCasesSeen();
+  };
+
+  // 사례 팝업. 입장 전후 어느 화면에서든 같은 모양으로 뜬다.
+  const casesModal =
+    casesOpen && !expired ? (
+      <Modal title="바이브 코딩 수업 적용 사례" onClose={closeCases} wide>
+        <CaseShowcase headingLevel="h2" onClose={closeCases} />
+        <div className="mt-8 flex flex-wrap items-center gap-4">
+          <button type="button" className="btn-secondary" onClick={closeCases}>
+            닫고 시작하기
+          </button>
+          <span className="body-sm">상단 메뉴의 수업 사례에서 다시 볼 수 있습니다</span>
+        </div>
+      </Modal>
+    ) : null;
 
   if (!restored) return null;
 
+  // 참가자는 입장 화면을 먼저 본다. 여기서 안 띄우면 사례를 못 보고 지나간다.
   if (!name) {
     return (
-      <EnterGate
-        onEntered={(n, r) => {
-          setName(n);
-          setRole(r);
-        }}
-      />
+      <>
+        <EnterGate
+          onEntered={(n, r) => {
+            setName(n);
+            setRole(r);
+          }}
+        />
+        {casesModal}
+      </>
     );
   }
 
@@ -85,6 +121,8 @@ export default function HomePage() {
         stuck={progress?.stuck === true}
         onToggle={(next) => setStuck(next)}
       />
+
+      {casesModal}
       {expired ? <ExpiredNotice onReenter={leave} /> : null}
     </>
   );

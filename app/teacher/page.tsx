@@ -8,6 +8,29 @@ import type { Mission, Progress, RosterEntry } from "@/lib/types";
 
 const PIN_KEY = "basecamp:pin";
 
+// 저장소가 막힌 브라우저에서도 대시보드는 열려야 한다. PIN 을 기억하지 못할 뿐이다.
+function readPin(): string | null {
+  try {
+    return sessionStorage.getItem(PIN_KEY);
+  } catch {
+    return null;
+  }
+}
+function writePin(value: string) {
+  try {
+    sessionStorage.setItem(PIN_KEY, value);
+  } catch {
+    // 이번 화면에서만 유지된다
+  }
+}
+function clearPin() {
+  try {
+    sessionStorage.removeItem(PIN_KEY);
+  } catch {
+    // 지우지 못해도 화면은 잠긴다
+  }
+}
+
 export default function TeacherPage() {
   const [pin, setPin] = useState("");
   const [authed, setAuthed] = useState(false);
@@ -27,7 +50,7 @@ export default function TeacherPage() {
 
   // 저장된 PIN 이 있어도 서버에 다시 물어본 뒤에 들여보낸다.
   useEffect(() => {
-    const saved = sessionStorage.getItem(PIN_KEY);
+    const saved = readPin();
     if (!saved) return;
     setPin(saved);
     (async () => {
@@ -38,9 +61,9 @@ export default function TeacherPage() {
           body: JSON.stringify({ action: "verify", pin: saved }),
         });
         if (res.ok) setAuthed(true);
-        else sessionStorage.removeItem(PIN_KEY);
+        else clearPin();
       } catch {
-        sessionStorage.removeItem(PIN_KEY);
+        clearPin();
       }
     })();
   }, []);
@@ -175,7 +198,7 @@ export default function TeacherPage() {
         setError("PIN이 맞지 않습니다. 다시 입력해 주세요.");
         return;
       }
-      sessionStorage.setItem(PIN_KEY, pin);
+      writePin(pin);
       setAuthed(true);
     } finally {
       setBusy(false);
@@ -243,7 +266,7 @@ export default function TeacherPage() {
           type="button"
           className="btn-secondary"
           onClick={() => {
-            sessionStorage.removeItem(PIN_KEY);
+            clearPin();
             setAuthed(false);
           }}
         >

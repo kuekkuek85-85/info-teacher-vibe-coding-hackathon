@@ -10,10 +10,13 @@ export default function Modal({
   title,
   onClose,
   children,
+  wide = false,
 }: {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
+  /** 사례 소개처럼 내용이 넓게 펼쳐져야 할 때 */
+  wide?: boolean;
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const opener = useRef<Element | null>(null);
@@ -84,7 +87,9 @@ export default function Modal({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className="card max-h-[80vh] w-full max-w-2xl overflow-y-auto outline-none"
+        className={`card max-h-[85vh] w-full overflow-y-auto outline-none ${
+          wide ? "max-w-5xl" : "max-w-2xl"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
