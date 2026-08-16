@@ -387,9 +387,10 @@ export default function TeacherPage() {
                 type="button"
                 disabled={busy}
                 className="btn-secondary"
+                aria-label={`${d.id} ${d.title} 슬라이드 띄우기`}
                 onClick={() => call("showSlides", { deck: d.id, index: 0 })}
               >
-                {d.title} 슬라이드 보기
+                {d.id} : {d.title}
               </button>
             ))}
           </div>
