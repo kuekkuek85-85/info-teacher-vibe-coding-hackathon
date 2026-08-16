@@ -6,8 +6,16 @@ export interface CaseItem {
   point: string;
   /** 만들게 된 경위나 수업에서 쓴 방법 */
   detail: string;
+  /** 도구를 만든 사람. 발표자와 다를 때 밝힌다 */
+  maker?: string;
   url?: string;
   urlLabel?: string;
+  /**
+   * 저장소에 함께 둘 자료. 형식과 용량을 함께 적는다.
+   * 학생 학번이나 질문 원문이 들어간 자료는 여기에 넣지 않는다.
+   * 공개 URL 이라 누구나 내려받을 수 있다.
+   */
+  file?: { label: string; url: string; meta: string };
   /** 언론 보도 같은 참고 자료 */
   reference?: { label: string; url: string };
   /** 색 블록 배경 클래스 */
@@ -18,9 +26,10 @@ export const CASES: CaseItem[] = [
   {
     track: "정보",
     title: "코드쌤봇",
-    point: "생각하면서 바이브 코딩하게 만드는 도구",
+    point: "AI 앞에서 학생이 먼저 생각하게 만드는 도구",
     detail:
-      "슬라이드로 넘기던 이론 설명을 봇이 맡습니다. 학생은 답을 받아 적는 대신 무엇을 물어야 할지 먼저 생각합니다.",
+      "스크래치 오류를 만나면 15분은 혼자 붙듭니다. 그 뒤에야 봇에게 묻고, 질문은 전부 기록에 남습니다. 문제가 있는 블록이 뭐냐고 묻던 학생이 왜 그 블록이라고 판단했냐고 되묻는 데까지 갑니다.",
+    maker: "코드쌤봇 제작 · 장평중 정아림",
     tone: "bg-blockLime",
   },
   {

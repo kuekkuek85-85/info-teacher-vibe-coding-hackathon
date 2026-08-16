@@ -20,8 +20,8 @@ export default function CaseShowcase({
         <p className="eyebrow">바이브 코딩 수업 적용 사례</p>
         <Heading className="display-lg mt-3">교실에서 이렇게 썼습니다</Heading>
         <p className="body-lg mt-4">
-          네 가지 모두 오늘 배운 방식으로 만들었습니다. 도구가 아니라 어디가 아팠는지를
-          먼저 보세요.
+          네 가지 모두 학교에서 만들어 쓰고 있는 것들입니다. 도구가 아니라 어디가
+          아팠는지를 먼저 보세요.
         </p>
         {onClose ? (
           <button type="button" className="btn-primary mt-6" onClick={onClose}>
@@ -45,6 +45,7 @@ export default function CaseShowcase({
             <h3 className="card-title mt-4">{c.title}</h3>
             <p className="link-strong mt-2">{c.point}</p>
             <p className="body-sm mt-3">{c.detail}</p>
+            {c.maker ? <p className="caption mt-3">{c.maker}</p> : null}
 
             {c.url ? (
               <p className="mt-4">
@@ -56,6 +57,20 @@ export default function CaseShowcase({
                 >
                   {c.urlLabel}
                   <span className="caption ml-2">새 창</span>
+                </a>
+              </p>
+            ) : null}
+            {c.file ? (
+              <p className="mt-4">
+                <a
+                  href={c.file.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-secondary"
+                  aria-label={`${c.file.label}, ${c.file.meta}`}
+                >
+                  {c.file.label}
+                  <span className="caption ml-3">{c.file.meta}</span>
                 </a>
               </p>
             ) : null}

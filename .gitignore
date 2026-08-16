@@ -4,5 +4,8 @@ out/
 .env*
 !.env.example
 scripts/codes-출력.csv
+
+# 강의 자료에 학생 학번과 질문 원문이 들어 있다. 공개 배포에 올리지 않는다.
+public/**/*.pdf
 *.tsbuildinfo
 next-env.d.ts
