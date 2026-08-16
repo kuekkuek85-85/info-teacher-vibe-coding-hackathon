@@ -22,6 +22,11 @@ export interface Mission {
   session: string;
   guide: string;
   promptCard?: string;
+  /** 프롬프트 카드의 자리표시자에 채울 내 제출물 */
+  promptFill?: {
+    slot: string;
+    sources: { mission: string; keys: string[]; label?: string }[];
+  };
   prefill?: { template: string };
   fields: MissionField[];
   carryover: Carryover[];

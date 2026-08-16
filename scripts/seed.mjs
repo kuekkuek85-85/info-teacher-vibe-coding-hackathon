@@ -179,6 +179,12 @@ const missions = [
 아직 코드는 쓰지 마.
 --- PRD ---
 (붙여넣기)`,
+    promptFill: {
+      slot: "(붙여넣기)",
+      sources: [
+        { mission: "m3", label: "PRD", keys: ["problem", "mvp", "context", "p1", "stack"] },
+      ],
+    },
     fields: [
       { key: "scenario", label: "사용자 시나리오", type: "textarea" },
       { key: "wireframe", label: "화면 목록 + 텍스트 와이어프레임", type: "textarea" },
@@ -194,7 +200,7 @@ const missions = [
     session: "스프린트 1",
     visibility: "name",
     guide:
-      "클로드 새 대화를 열어 아래 카드로 계획을 검토받으세요. 같이 만든 대화의 클로드는 자기 계획에 관대해서, 맥락 없는 새 대화가 남의 눈 노릇을 합니다. 지적은 수용과 거부로 나눠 이유와 함께 기록합니다. 전부 수용했다면 그것도 검증을 포기한 셈입니다. 동료 검토도 여기서 합니다. 배정된 상대의 m3와 m4를 열람하고 체크리스트와 코멘트를 남겨 주세요.",
+      "클로드(혹은 Chat GPT 등) 새 대화를 열어 아래 카드로 계획을 검토받으세요. 같이 만든 대화의 클로드는 자기 계획에 관대해서, 맥락 없는 새 대화가 남의 눈 노릇을 합니다. 지적은 수용과 거부로 나눠 이유와 함께 기록합니다. 전부 수용했다면 그것도 검증을 포기한 셈입니다. 동료 검토도 여기서 합니다. 배정된 상대의 m3와 m4를 열람하고 체크리스트와 코멘트를 남겨 주세요.",
     promptCard: `너는 까다로운 소프트웨어 설계 리뷰어다. 아래 PRD와 구현 계획을 검토해 이 형식으로만 답하라.
 1) 반나절(약 3시간)에 불가능해 보이는 지점 1가지와 축소안
 2) 테스트 케이스 설계에서 빠진 실패 시나리오 2가지
@@ -203,6 +209,17 @@ const missions = [
 각 3문장 이내. 칭찬 금지.
 --- PRD & 계획 ---
 (붙여넣기)`,
+    promptFill: {
+      slot: "(붙여넣기)",
+      sources: [
+        { mission: "m3", label: "PRD", keys: ["problem", "mvp", "context", "p1", "stack"] },
+        {
+          mission: "m4",
+          label: "구현 계획",
+          keys: ["scenario", "wireframe", "test_design"],
+        },
+      ],
+    },
     fields: [
       { key: "accepted", label: "수용해 계획에 반영한 것", type: "textarea" },
       { key: "rejected", label: "거부한 지적과 그 이유", type: "textarea" },
@@ -248,7 +265,7 @@ const missions = [
     session: "스프린트 2",
     visibility: "public",
     guide:
-      '이번 스텝의 지시문은 하나입니다. "이 테스트를 통과시키는 최소한의 구현을 해줘." 통과했으면 배포까지 갑니다. 안 되는 부분이 있어도 괜찮으니 남은 일에 적어 두세요. 그것도 제출입니다.',
+      '이번 스텝의 지시문은 하나입니다. "이 테스트를 통과시키는 최소한의 구현을 해줘." 통과했으면 Github 커밋, 푸시까지 가고, 배포까지 갑니다. 안 되는 부분이 있어도 괜찮으니 남은 일에 적어 두세요. 그것도 제출입니다.',
     fields: [
       { key: "green_count", label: "통과한 테스트 개수", type: "text" },
       { key: "deploy_url", label: "배포 URL", type: "url" },
@@ -265,7 +282,7 @@ const missions = [
     session: "스프린트 2~3",
     visibility: "name",
     guide:
-      "클로드 새 대화에서 코드를 검토받고, 무엇을 받아들일지 정한 뒤 다듬습니다. 마지막은 커밋과 푸시인데 이것만은 본인 손으로 하세요. 저장소에 남는 기록은 AI가 아니라 여러분의 결정이니까요. 이 미션은 오후 스프린트 3까지 열려 있습니다.",
+      "코드의 리팩토링을 검토받고, 무엇을 받아들일지 정한 뒤 다듬습니다. 마지막은 커밋과 푸시인데 이것만은 본인 손으로 하세요. 저장소에 남는 기록은 AI가 아니라 여러분의 결정이니까요.",
     promptCard: `너는 까다로운 코드 리뷰어다. 아래 핵심 파일들을 검토해 이 형식으로만 답하라.
 1) 지금 고치지 않으면 나중에 아플 곳 2가지
 2) 테스트가 놓치고 있는 구멍 1가지
@@ -278,7 +295,7 @@ const missions = [
       { key: "rejected", label: "거부한 지적과 이유", type: "textarea" },
       { key: "commit_msg", label: "내가 쓴 커밋 메시지", type: "text" },
       { key: "pushed", label: "푸시 완료 (예/아니오)", type: "select", options: ["예", "아니오"] },
-      { key: "peer_feedback", label: "옆 사람 도구를 써 보고 남긴 한 줄", type: "textarea" },
+      { key: "peer_feedback", label: "내 동료의 도구를 써 보고 남긴 한 줄", type: "textarea" },
     ],
     carryover: [{ fromMission: "m7", fromKey: "repo_url", label: "m7 깃허브 저장소" }],
   },

@@ -97,6 +97,53 @@ check(
   m2.guide.slice(-40),
 );
 
+// 프롬프트 카드에 내 제출물이 채워지는지. 자리표시자와 slot 이 어긋나면 안 채워진다.
+for (const [id, sources] of Object.entries({ m4: ["m3"], m5: ["m3", "m4"] })) {
+  const m = missions.find((x) => x.id === id);
+  const fill = m.promptFill;
+  check(`${id} promptFill 있음`, Boolean(fill));
+  check(
+    `${id} slot 이 카드 안에 있다`,
+    Boolean(fill) && m.promptCard.includes(fill.slot),
+    fill?.slot,
+  );
+  check(
+    `${id} 출처가 ${sources.join(",")}`,
+    JSON.stringify(fill?.sources?.map((s) => s.mission)) === JSON.stringify(sources),
+    JSON.stringify(fill?.sources?.map((s) => s.mission)),
+  );
+  // 출처로 지정한 키가 그 미션에 실제로 있어야 한다
+  for (const s of fill?.sources ?? []) {
+    const from = missions.find((x) => x.id === s.mission);
+    const keys = from.fields.map((f) => f.key);
+    check(
+      `${id} 가 참조하는 ${s.mission} 키가 모두 존재`,
+      s.keys.every((k) => keys.includes(k)),
+      s.keys.filter((k) => !keys.includes(k)).join(",") || "누락 없음",
+    );
+  }
+}
+
+// 검토는 클로드가 아니어도 된다. 안내가 한 도구만 가리키면 안 된다.
+const m5 = missions.find((m) => m.id === "m5");
+check(
+  "m5 안내가 다른 도구도 허용한다",
+  m5.guide.includes("Chat GPT"),
+  m5.guide.slice(0, 24),
+);
+
+// 구현·리팩토링 단계 안내
+const m7 = missions.find((m) => m.id === "m7");
+const m8 = missions.find((m) => m.id === "m8");
+check("m7 안내가 커밋·푸시를 포함한다", m7.guide.includes("Github 커밋, 푸시까지"));
+check("m8 안내가 리팩토링으로 시작한다", m8.guide.startsWith("코드의 리팩토링을 검토받고"));
+check("m8 안내에 지난 일정이 없다", !m8.guide.includes("오후 스프린트 3"));
+check(
+  "m8 동료 칸 이름",
+  m8.fields.find((f) => f.key === "peer_feedback").label ===
+    "내 동료의 도구를 써 보고 남긴 한 줄",
+);
+
 const m3problem = missions
   .find((m) => m.id === "m3")
   .fields.find((f) => f.key === "problem");

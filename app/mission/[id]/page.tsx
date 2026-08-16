@@ -8,9 +8,11 @@ import CarryoverPanel from "@/components/CarryoverPanel";
 import ExpiredNotice from "@/components/ExpiredNotice";
 import MissionForm from "@/components/MissionForm";
 import PeerReviewSection from "@/components/PeerReviewSection";
+import PeerToolLinks from "@/components/PeerToolLinks";
 import PromptCard from "@/components/PromptCard";
 import StuckButton from "@/components/StuckButton";
 import TopNav from "@/components/TopNav";
+import { buildPromptText } from "@/lib/promptCard";
 import { clearSession, getSavedName, getSavedRole } from "@/lib/session";
 import { useProgress } from "@/lib/useProgress";
 
@@ -98,7 +100,18 @@ export default function MissionPage({
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>{mission.guide}</ReactMarkdown>
               </div>
 
-              {mission.promptCard ? <PromptCard text={mission.promptCard} /> : null}
+              {mission.promptCard ? (
+                <PromptCard
+                  key={mission.id}
+                  text={buildPromptText(mission, missions, progress)}
+                  storageKey={`prompt:${name}:${mission.id}`}
+                  filled={Boolean(mission.promptFill)}
+                />
+              ) : null}
+
+              {mission.id === "m8" ? (
+                <PeerToolLinks target={progress?.reviewTarget} />
+              ) : null}
 
               <MissionForm
                 mission={mission}
