@@ -1,6 +1,7 @@
 // 강사가 참가자 화면에 띄우는 자료를 확인한다.
 // 실행: node scripts/check-slides.ts
 import { existsSync, readFileSync } from "node:fs";
+import { deckNote } from "../lib/deckNotes.ts";
 import { DECKS, clampIndex, findDeck, slideSrc } from "../lib/decks.ts";
 
 let failures = 0;
@@ -84,7 +85,23 @@ check(
   ),
 );
 
-// 6. 리허설에서 띄운 채로 끝내면 다음 사람 화면이 막힌다
+// 6. 대본. 강사가 보고 읽는다
+for (const d of DECKS) {
+  let empty = 0;
+  for (let i = 0; i < d.count; i++) if (!deckNote(d, i).trim()) empty++;
+  check(`${d.id} 모든 장에 대본이 있다`, empty === 0, `빈 장 ${empty}개`);
+  check(`${d.id} 대본에 출처 표기가 없다`, !deckNote(d, 0).includes("[Sources]"));
+  check(`${d.id} 범위 밖은 첫 장 대본`, deckNote(d, -3) === deckNote(d, 0));
+  check(`${d.id} 마지막 장 대본이 있다`, deckNote(d, d.count - 1).length > 20);
+}
+check("대본은 참가자 화면에 나가지 않는다", !overlay.includes("deckNote"));
+check("대본이 강사 화면에 나온다", teacher.includes("deckNote(showing, slideIndex)"));
+// 오버레이가 쓰는 파일에 대본이 있으면 번들에 실려 모든 참가자에게 내려간다
+const decks = readFileSync(new URL("../lib/decks.ts", import.meta.url), "utf8");
+check("자료 목록 파일이 대본을 안고 있지 않다", !decks.includes("notes/"));
+check("강사 화면만 대본 파일을 가져온다", teacher.includes('from "@/lib/deckNotes"'));
+
+// 7. 리허설에서 띄운 채로 끝내면 다음 사람 화면이 막힌다
 const reset = readFileSync(new URL("./reset-progress.mjs", import.meta.url), "utf8");
 check(
   "초기화가 띄운 자료를 내린다",

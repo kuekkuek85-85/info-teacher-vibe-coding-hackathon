@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import Modal from "@/components/Modal";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
+import { deckNote } from "@/lib/deckNotes";
 import { DECKS, clampIndex, findDeck, slideSrc } from "@/lib/decks";
 import { readmeOrder, readmeRanks } from "@/lib/readmeOrder";
 import type { Mission, Progress, RosterEntry } from "@/lib/types";
@@ -401,12 +402,29 @@ export default function TeacherPage() {
               </span>
             </div>
 
-            <img
-              src={slideSrc(showing, clampIndex(showing, slideIndex))}
-              alt={`${showing.title} ${clampIndex(showing, slideIndex) + 1}번째 슬라이드`}
-              className="mt-4 w-full max-w-[720px]"
-              style={{ borderRadius: 8 }}
-            />
+            {/* 왼쪽은 지금 참가자가 보는 화면, 오른쪽은 읽을 대본이다. */}
+            <div className="mt-4 grid gap-6 min-[900px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+              <img
+                src={slideSrc(showing, clampIndex(showing, slideIndex))}
+                alt={`${showing.title} ${clampIndex(showing, slideIndex) + 1}번째 슬라이드`}
+                className="w-full"
+                style={{ borderRadius: 8, alignSelf: "start" }}
+              />
+
+              <div className="tile" style={{ padding: 20 }}>
+                <p className="caption">대본</p>
+                {deckNote(showing, slideIndex) ? (
+                  <p
+                    className="mt-3 whitespace-pre-wrap"
+                    style={{ fontSize: 19, lineHeight: 1.75 }}
+                  >
+                    {deckNote(showing, slideIndex)}
+                  </p>
+                ) : (
+                  <p className="body-sm mt-3">이 장에는 적어 둔 대본이 없습니다.</p>
+                )}
+              </div>
+            </div>
 
             <div className="mt-5 flex flex-wrap gap-3">
               <button
