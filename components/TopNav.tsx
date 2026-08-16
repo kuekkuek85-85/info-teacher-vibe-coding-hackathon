@@ -24,9 +24,12 @@ export default function TopNav({
             베이스캠프
           </Link>
 
-          <nav className="hidden items-center gap-5 min-[860px]:flex">
+          <nav className="hidden items-center gap-5 min-[1040px]:flex">
             <Link href="/plaza" className="link-strong body-sm py-2">
               광장
+            </Link>
+            <Link href="/readme" className="link-strong body-sm py-2">
+              발표 README
             </Link>
             <Link href="/cases" className="link-strong body-sm py-2">
               수업 사례
@@ -36,11 +39,14 @@ export default function TopNav({
             </Link>
           </nav>
 
-          <details className="relative ml-auto min-[860px]:hidden">
+          <details className="relative ml-auto min-[1040px]:hidden">
             <summary className="btn-secondary cursor-pointer list-none">메뉴</summary>
-            <div className="card absolute right-0 top-[52px] w-[200px] p-4">
+            <div className="card absolute right-0 top-[52px] w-[220px] p-4">
               <Link href="/plaza" className="link-strong body-sm block py-2">
                 광장
+              </Link>
+              <Link href="/readme" className="link-strong body-sm block py-2">
+                발표 README
               </Link>
               <Link href="/cases" className="link-strong body-sm block py-2">
                 수업 사례
@@ -52,7 +58,7 @@ export default function TopNav({
           </details>
 
           {name ? (
-            <div className="flex items-center gap-3 min-[860px]:ml-auto">
+            <div className="flex items-center gap-3 min-[1040px]:ml-auto">
               <span className="caption hidden min-[560px]:inline">
                 {name}
                 {role === "staff" ? " · 강사" : ""}

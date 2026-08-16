@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import TopNav from "@/components/TopNav";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
+import { safeHttpUrl } from "@/lib/readme";
 import { clearSession, getSavedName, getSavedRole } from "@/lib/session";
 import type { Mission, Progress } from "@/lib/types";
 
@@ -147,14 +148,19 @@ export default function PlazaPage() {
                             <dt className="caption">{field.label}</dt>
                             <dd className="mt-1">
                               {field.type === "url" ? (
-                                <a
-                                  href={v}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="link-strong body-sm break-all underline"
-                                >
-                                  {v}
-                                </a>
+                                // 참가자가 적은 주소를 그대로 열지 않는다
+                                safeHttpUrl(v) ? (
+                                  <a
+                                    href={safeHttpUrl(v) as string}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="link-strong body-sm break-all underline"
+                                  >
+                                    {v}
+                                  </a>
+                                ) : (
+                                  <span className="body-sm break-all">{v}</span>
+                                )
                               ) : (
                                 <span className="body-sm whitespace-pre-wrap">{v}</span>
                               )}

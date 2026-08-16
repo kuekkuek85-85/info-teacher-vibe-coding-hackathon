@@ -410,6 +410,9 @@ export default function TeacherPage() {
               <th className="caption border-b border-hairline px-2 py-3 text-left">
                 검토 상대
               </th>
+              <th className="caption border-b border-hairline px-2 py-3 text-center">
+                README
+              </th>
               <th className="caption border-b border-hairline px-2 py-3 text-right">
                 입장
               </th>
@@ -447,6 +450,15 @@ export default function TeacherPage() {
                   })}
                   <td className="body-sm border-b border-hairlineSoft px-2 py-1">
                     {p?.reviewTarget ?? "·"}
+                  </td>
+                  <td className="body-sm border-b border-hairlineSoft px-2 py-1 text-center">
+                    {p?.readmePushed ? (
+                      <span className="link-strong" title="README 를 올렸습니다">
+                        ✓
+                      </span>
+                    ) : (
+                      "·"
+                    )}
                   </td>
                   <td className="border-b border-hairlineSoft px-2 py-1 text-right">
                     {p?.ownerUid ? (

@@ -99,6 +99,28 @@ export function useProgress(name: string | null) {
     }
   };
 
+  /** 발표용 README 초안을 저장한다. */
+  const saveReadme = async (text: string) => {
+    if (!name) throw new Error("이름이 없습니다");
+    try {
+      await updateDoc(doc(getDb(), "progress", name), { readmeDraft: text });
+    } catch (e) {
+      if (isPermissionDenied(e)) setExpired(true);
+      throw e;
+    }
+  };
+
+  /** 저장소에 README 를 올렸는지 표시한다. 실패하면 부르는 쪽이 알아야 한다. */
+  const setReadmePushed = async (pushed: boolean) => {
+    if (!name) throw new Error("이름이 없습니다");
+    try {
+      await updateDoc(doc(getDb(), "progress", name), { readmePushed: pushed });
+    } catch (e) {
+      if (isPermissionDenied(e)) setExpired(true);
+      throw e;
+    }
+  };
+
   const setStuck = async (stuck: boolean) => {
     if (!name) return;
     try {
@@ -111,5 +133,15 @@ export function useProgress(name: string | null) {
     }
   };
 
-  return { progress, missions, ready, expired, saveMission, submitMission, setStuck };
+  return {
+    progress,
+    missions,
+    ready,
+    expired,
+    saveMission,
+    submitMission,
+    saveReadme,
+    setReadmePushed,
+    setStuck,
+  };
 }

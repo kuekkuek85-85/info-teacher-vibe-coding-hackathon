@@ -28,6 +28,12 @@ service cloud.firestore {
         && request.resource.data.missions.keys().size() <= 20
         && request.resource.data.currentStep is string
         && request.resource.data.stuck is bool
+        // 발표용 README. 문서 하나 분량을 넘지 않게 묶어 둔다.
+        && (!('readmeDraft' in request.resource.data)
+            || (request.resource.data.readmeDraft is string
+                && request.resource.data.readmeDraft.size() <= 20000))
+        && (!('readmePushed' in request.resource.data)
+            || request.resource.data.readmePushed is bool)
         && (!('reviewTarget' in request.resource.data)
             || request.resource.data.reviewTarget == resource.data.get('reviewTarget', ''));
     }

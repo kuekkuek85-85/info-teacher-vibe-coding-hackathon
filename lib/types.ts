@@ -45,6 +45,10 @@ export interface Progress {
   stuck: boolean;
   stuckAt?: unknown;
   reviewTarget?: string;
+  /** 발표용 README. 초안을 고친 내용을 여기에 둔다 */
+  readmeDraft?: string;
+  /** 저장소에 README 를 올렸는지. 발표 준비 상태를 본다 */
+  readmePushed?: boolean;
 }
 
 export interface RosterEntry {

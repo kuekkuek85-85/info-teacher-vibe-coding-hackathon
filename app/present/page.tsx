@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
+import { safeGithubUrl, safeHttpUrl } from "@/lib/readme";
 import type { Progress } from "@/lib/types";
 
 export default function PresentPage() {
@@ -56,6 +57,8 @@ export default function PresentPage() {
   const m7 = p?.missions?.m7?.data;
   const m8 = p?.missions?.m8?.data;
   const oneline = p?.missions?.m2?.data?.oneline;
+  const repoUrl = safeGithubUrl(m7?.repo_url ?? "");
+  const deployUrl = safeHttpUrl(m7?.deploy_url ?? "");
 
   return (
     <main className="mx-auto flex min-h-screen max-w-[1000px] flex-col justify-center px-6 py-12">
@@ -69,21 +72,46 @@ export default function PresentPage() {
         ) : null}
       </div>
 
-      <div className="mt-10">
-        {m7?.deploy_url ? (
-          <a
-            href={m7.deploy_url}
-            target="_blank"
-            rel="noreferrer"
-            className="link-strong break-all text-[26px] underline"
-          >
-            {m7.deploy_url}
-          </a>
+      <div className="mt-10 space-y-5">
+        {/* 발표는 README 로 한다. 저장소를 먼저 놓는다.
+            참가자가 적은 주소를 그대로 열지 않고 깃허브인지 확인한다. */}
+        {repoUrl ? (
+          <p>
+            <a
+              href={repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="link-strong break-all text-[26px] underline"
+            >
+              {repoUrl}
+            </a>
+            {p?.readmePushed ? (
+              <span className="caption ml-4">README 올림</span>
+            ) : null}
+          </p>
+        ) : m7?.repo_url ? (
+          <p className="body-lg">
+            저장소 주소가 깃허브가 아닙니다. 발표자에게 직접 확인해 주세요.
+          </p>
         ) : (
-          <p className="body-lg">배포 URL이 아직 없습니다.</p>
+          <p className="body-lg">저장소 주소가 아직 없습니다.</p>
         )}
+
+        {deployUrl ? (
+          <p>
+            <a
+              href={deployUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="link-strong break-all text-[22px] underline"
+            >
+              {deployUrl}
+            </a>
+          </p>
+        ) : null}
+
         {m8?.commit_msg ? (
-          <p className="body-lg mt-5">커밋 메시지: {m8.commit_msg}</p>
+          <p className="body-lg">커밋 메시지: {m8.commit_msg}</p>
         ) : null}
       </div>
 
