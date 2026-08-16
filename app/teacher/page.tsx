@@ -344,7 +344,7 @@ export default function TeacherPage() {
                   call("openMission", { missionId: m.id });
                 }
               }}
-              // 여덟 개가 나란히 서는 자리다. 검정 채움은 주요 동작 하나에만 쓰고,
+              // 열 개가 나란히 서는 자리다. 검정 채움은 주요 동작 하나에만 쓰고,
               // 열림과 닫힘은 표면(라임 칩과 흰 알약)으로 구분한다.
               className={
                 m.open

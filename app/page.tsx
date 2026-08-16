@@ -8,6 +8,7 @@ import MissionCard from "@/components/MissionCard";
 import Modal from "@/components/Modal";
 import Stepper from "@/components/Stepper";
 import StuckButton from "@/components/StuckButton";
+import TutorPanel from "@/components/TutorPanel";
 import TopNav from "@/components/TopNav";
 import {
   clearSession,
@@ -92,7 +93,7 @@ export default function HomePage() {
       <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-12">
         <section>
           <p className="eyebrow">파이프라인</p>
-          <h1 className="display-lg mt-3">여덟 칸을 왼쪽부터 밟습니다</h1>
+          <h1 className="display-lg mt-3">열 칸을 왼쪽부터 밟습니다</h1>
           <p className="body-lg mt-3">
             열린 칸은 언제든 다시 들어가 고칠 수 있습니다.
           </p>
@@ -124,6 +125,8 @@ export default function HomePage() {
           )}
         </section>
       </main>
+      {/* 지금 밟고 있는 단계를 물어볼 수 있게 홈에도 둔다. */}
+      <TutorPanel name={name} missionId={progress?.currentStep} />
       <StuckButton
         stuck={progress?.stuck === true}
         onToggle={(next) => setStuck(next)}

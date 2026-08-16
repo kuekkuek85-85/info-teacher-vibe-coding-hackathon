@@ -27,9 +27,11 @@ const app =
   });
 const db = getFirestore(app);
 
-const [progressSnap, reviewsSnap] = await Promise.all([
+const [progressSnap, reviewsSnap, tutorSnap] = await Promise.all([
   db.collection("progress").get(),
   db.collection("reviews").get(),
+  // 리허설에서 쌓인 튜터 사용 기록이 남으면 당일 첫 질문이 막힐 수 있다.
+  db.collection("tutorUsage").get(),
 ]);
 
 if (!process.argv.includes("--yes")) {
@@ -47,6 +49,7 @@ if (!process.argv.includes("--yes")) {
 const batch = db.batch();
 progressSnap.docs.forEach((d) => batch.delete(d.ref));
 reviewsSnap.docs.forEach((d) => batch.delete(d.ref));
+tutorSnap.docs.forEach((d) => batch.delete(d.ref));
 const missions = await db.collection("missions").get();
 missions.docs.forEach((d) => batch.update(d.ref, { open: false }));
 // 리허설에서 정한 발표 순서가 남아 있으면 당일 /present 에 그대로 뜬다.
@@ -54,5 +57,5 @@ batch.set(db.collection("config").doc("global"), { presentOrder: [] }, { merge: 
 await batch.commit();
 
 console.log(
-  `progress ${progressSnap.size}건, reviews ${reviewsSnap.size}건을 지웠습니다. 미션 ${missions.size}종을 닫고 발표 순서를 비웠습니다.`,
+  `progress ${progressSnap.size}건, reviews ${reviewsSnap.size}건, 튜터 기록 ${tutorSnap.size}건을 지웠습니다. 미션 ${missions.size}종을 닫고 발표 순서를 비웠습니다.`,
 );

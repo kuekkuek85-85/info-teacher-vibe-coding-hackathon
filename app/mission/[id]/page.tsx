@@ -11,6 +11,7 @@ import PeerReviewSection from "@/components/PeerReviewSection";
 import PeerToolLinks from "@/components/PeerToolLinks";
 import PromptCard from "@/components/PromptCard";
 import StuckButton from "@/components/StuckButton";
+import TutorPanel from "@/components/TutorPanel";
 import TopNav from "@/components/TopNav";
 import { buildPromptText } from "@/lib/promptCard";
 import { clearSession, getSavedName, getSavedRole } from "@/lib/session";
@@ -165,6 +166,10 @@ export default function MissionPage({
           </>
         )}
       </main>
+      {/* 잠긴 미션과 없는 미션 화면에는 띄우지 않는다. 물어볼 단계가 아직 없다. */}
+      {mission?.open ? (
+        <TutorPanel name={name} missionId={mission.id} missionTitle={mission.title} />
+      ) : null}
       <StuckButton stuck={progress?.stuck === true} onToggle={(next) => setStuck(next)} />
       {expired ? (
         <ExpiredNotice

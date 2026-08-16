@@ -12,6 +12,9 @@ service cloud.firestore {
     // 예전 문서가 남아 있어도 아무도 읽지 못하게 막아 둔다.
     match /codes/{name}    { allow read, write: if false; }
 
+    // 튜터 사용 기록. 서버만 세고 지운다. 클라이언트가 지우면 제한이 무의미하다.
+    match /tutorUsage/{name} { allow read, write: if false; }
+
     match /progress/{name} {
       allow read: if request.auth != null;
       allow create: if false;  // 생성은 /api/enter 에서만
