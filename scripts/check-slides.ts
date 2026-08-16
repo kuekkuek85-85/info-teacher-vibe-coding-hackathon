@@ -15,9 +15,17 @@ check("자료가 하나 이상 있다", DECKS.length > 0);
 const m0 = findDeck("m0");
 check("m0 자료가 있다", Boolean(m0));
 check("m0 제목", m0?.title === "바이브 코딩의 필요성", m0?.title);
-const m2 = findDeck("m2");
-check("m2 자료가 있다", Boolean(m2));
-check("m2 제목", m2?.title === "바이브 코딩 목적과 타겟 유저", m2?.title);
+// 자료를 더할 때마다 여기 한 줄 늘린다. 목록과 제목이 어긋나면 잡힌다.
+const EXPECTED: Record<string, string> = {
+  m2: "바이브 코딩 목적과 타겟 유저",
+  m3: "PRD",
+  m4: "구현 계획",
+};
+for (const [id, title] of Object.entries(EXPECTED)) {
+  const d = findDeck(id);
+  check(`${id} 자료가 있다`, Boolean(d));
+  check(`${id} 제목`, d?.title === title, d?.title);
+}
 check("없는 자료는 null", findDeck("없음") === null);
 check("빈 값도 null", findDeck("") === null && findDeck(undefined) === null);
 
