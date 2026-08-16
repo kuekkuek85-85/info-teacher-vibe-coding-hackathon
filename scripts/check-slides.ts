@@ -15,6 +15,9 @@ check("자료가 하나 이상 있다", DECKS.length > 0);
 const m0 = findDeck("m0");
 check("m0 자료가 있다", Boolean(m0));
 check("m0 제목", m0?.title === "바이브 코딩의 필요성", m0?.title);
+const m2 = findDeck("m2");
+check("m2 자료가 있다", Boolean(m2));
+check("m2 제목", m2?.title === "바이브 코딩 목적과 타겟 유저", m2?.title);
 check("없는 자료는 null", findDeck("없음") === null);
 check("빈 값도 null", findDeck("") === null && findDeck(undefined) === null);
 
@@ -90,7 +93,10 @@ for (const d of DECKS) {
   let empty = 0;
   for (let i = 0; i < d.count; i++) if (!deckNote(d, i).trim()) empty++;
   check(`${d.id} 모든 장에 대본이 있다`, empty === 0, `빈 장 ${empty}개`);
-  check(`${d.id} 대본에 출처 표기가 없다`, !deckNote(d, 0).includes("[Sources]"));
+  // 닫는 태그 없이 끝나는 것도 있어 모든 장을 본다
+  let sourced = 0;
+  for (let i = 0; i < d.count; i++) if (deckNote(d, i).includes("[Sources]")) sourced++;
+  check(`${d.id} 대본에 출처 표기가 없다`, sourced === 0, `남은 장 ${sourced}개`);
   check(`${d.id} 범위 밖은 첫 장 대본`, deckNote(d, -3) === deckNote(d, 0));
   check(`${d.id} 마지막 장 대본이 있다`, deckNote(d, d.count - 1).length > 20);
 }

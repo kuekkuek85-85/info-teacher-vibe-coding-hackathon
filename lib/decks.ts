@@ -12,6 +12,7 @@ export interface Deck {
  */
 export const DECKS: Deck[] = [
   { id: "m0", title: "바이브 코딩의 필요성", count: 6 },
+  { id: "m2", title: "바이브 코딩 목적과 타겟 유저", count: 1 },
 ];
 
 export function findDeck(id: string | undefined | null): Deck | null {
