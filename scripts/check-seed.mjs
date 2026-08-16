@@ -161,19 +161,19 @@ check(
 );
 
 // m2 캐묻기. 아이디어가 뭉툭한 채로 m3 에 넘어가면 PRD 도 뭉툭해진다.
-check("m2 카드가 캐묻는다", m2.promptCard?.includes("캐물어라"));
-check("m2 카드가 질문만 시킨다", m2.promptCard?.includes("답을 대신 정하지 마라"));
-check("m2 카드가 질문 수를 못 박는다", m2.promptCard?.includes("질문 5개만"));
-check("m2 카드는 대화창으로 간다", m2.promptTool === "chat", m2.promptTool);
+// 카드를 복사해 옮기지 않고 화면에서 바로 받는다. 그래서 promptCard 가 없다.
+check("m2 에 붙여넣을 카드가 없다", !m2.promptCard);
+check("m2 안내가 버튼을 가리킨다", m2.guide.includes("뾰족하게 버튼"));
+check("m2 안내가 시간을 못 박는다", m2.guide.includes("3분"));
 check("m2 단계 자체는 사람이 적는다", m2.tool === "human", m2.tool);
-check("m2 머리말이 카드와 어긋나지 않는다", m2.toolLine?.includes("먼저 직접 적습니다"));
+check("m2 머리말이 버튼을 가리킨다", m2.toolLine?.includes("뾰족하게 버튼"));
 check(
   "m2 가 바꾼 것과 안 바꾼 것을 남긴다",
   ["grill_changed", "grill_kept"].every((k) => m2.fields.some((f) => f.key === k)),
 );
 
 // 프롬프트 카드에 내 제출물이 채워지는지. 자리표시자와 slot 이 어긋나면 안 채워진다.
-for (const [id, sources] of Object.entries({ m2: ["m2"], m4: ["m3"], m5: ["m3", "m4"] })) {
+for (const [id, sources] of Object.entries({ m4: ["m3"], m5: ["m3", "m4"] })) {
   const m = missions.find((x) => x.id === id);
   const fill = m.promptFill;
   check(`${id} promptFill 있음`, Boolean(fill));

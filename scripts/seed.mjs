@@ -165,25 +165,9 @@ const missions = [
     visibility: "public",
     // 아이디어는 직접 적는다. 다 적은 뒤에만 AI를 캐묻는 쪽으로 쓴다.
     toolLine:
-      "먼저 직접 적습니다. 다 적은 뒤에 아래 카드로 AI에게 캐물어 아이디어를 뾰족하게 만듭니다.",
+      "먼저 직접 적습니다. 다 적은 뒤에 뾰족하게 버튼을 눌러 AI에게 캐물어 보세요.",
     guide:
-      "한 문장이면 됩니다. 누가, 무엇 때문에 힘든데, 어떤 도구가 있으면 되는지 적어 주세요. 다 적었으면 아래 카드로 AI에게 캐물어 보세요. 질문 다섯 개만 받고 3분 안에 끝낸 뒤, 바꾼 것과 안 바꾼 것을 남기면 다음 단계의 PRD가 뾰족해집니다.",
-    promptTool: "chat",
-    // 아이디어와 사용자를 적은 바로 다음에 카드가 선다. 그 뒤 두 칸에 결과를 남긴다.
-    promptCardAfter: "user",
-    promptCard: `너는 까다로운 심사위원이다. 아래 아이디어를 캐물어라.
-질문 5개만, 각 한 문장. 답을 대신 정하지 마라. 칭찬 금지.
-1) 이것이 진짜 병목인지 의심되는 지점
-2) 누구의 문제인지 흐린 지점
-3) 이미 있는 도구로 되는 것은 아닌지
-4) 반나절에 만들 수 없어 보이는 지점
-5) 학생 개인정보나 안전에서 걸리는 지점
---- 내 아이디어 ---
-(붙여넣기)`,
-    promptFill: {
-      slot: "(붙여넣기)",
-      sources: [{ mission: "m2", label: "아이디어", keys: ["oneline", "user"] }],
-    },
+      "한 문장이면 됩니다. 누가, 무엇 때문에 힘든데, 어떤 도구가 있으면 되는지 적어 주세요. 다 적었으면 뾰족하게 버튼을 눌러 캐물음을 받아 보세요. 질문 다섯 개를 3분 안에 훑고 바꾼 것과 안 바꾼 것을 남기면 다음 단계의 PRD가 뾰족해집니다.",
     fields: [
       { key: "oneline", label: "아이디어 한 줄", type: "textarea" },
       {
@@ -533,9 +517,11 @@ async function main() {
     const { id, ...rest } = mission;
     // open 은 항상 false 로 시작한다. 당일 운영자가 연다.
     // 이미 열린 미션을 다시 닫지 않도록 merge 로 쓰되 open 은 기존 값을 남긴다.
+    // merge 로 쓰면 정의에서 뺀 필드가 Firestore 에 남는다. 통째로 덮어쓰되
+    // open 만 기존 값을 옮겨 담는다. 미션 문서에는 이 둘 말고 다른 것이 없다.
     const ref = db.collection("missions").doc(id);
     const snap = await ref.get();
-    batch.set(ref, { ...rest, open: snap.exists ? snap.data().open === true : false }, { merge: true });
+    batch.set(ref, { ...rest, open: snap.exists ? snap.data().open === true : false });
   }
 
   // presentOrder 는 이미 정해 두었으면 건드리지 않는다.

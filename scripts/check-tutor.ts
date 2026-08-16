@@ -142,49 +142,58 @@ check(
   MODEL_CHAIN.every((m) => modelsToTry("내모델", MODEL_CHAIN[3]).includes(m)),
 );
 
-// 7. 서버 라우트가 지켜야 할 것
+// 7. 튜터 라우트가 지켜야 할 것
 const route = readFileSync(new URL("../app/api/tutor/route.ts", import.meta.url), "utf8");
-check("입장 토큰을 검증한다", route.includes("verifyIdToken"));
-check("그 이름의 주인인지 본다", route.includes("ownerUid !== uid"));
-check("횟수를 함께 쓰는 곳에 센다", route.includes("runTransaction"));
+check("입장한 사람인지 본다", route.includes("checkParticipant"));
+check("몰아 보내기를 막는다", route.includes("checkRate"));
 check("단계 정보를 서버에서 읽는다", route.includes('collection("missions")'));
-
-const panel = readFileSync(new URL("../components/TutorPanel.tsx", import.meta.url), "utf8");
-check("화면이 토큰을 실어 보낸다", panel.includes("Bearer ${idToken}"));
-check("키가 없으면 안내만 낸다", route.includes("GEMINI_API_KEY"));
-check("키를 응답에 흘리지 않는다", !route.includes("await res.text()"));
-// 생각하는 토큰까지 이 한도에서 나간다. 좁으면 답이 중간에 끊긴다.
-check("답이 잘리지 않을 만큼 준다", /maxOutputTokens:\s*2048/.test(route));
-check("길게 생각하지 않게 한다", route.includes('thinkingLevel: "low"'));
-check("설정을 모르는 모델이면 빼고 다시 부른다", route.includes("res.status === 400"));
-check("답한 모델을 기억한다", route.includes("lastGood = model"));
 check("열지 않은 단계는 넘기지 않는다", route.includes('snap.data()?.open === true'));
-check("모델마다 시간을 끊는다", route.includes("AbortSignal.timeout("));
-check("요청 전체에도 시간을 끊는다", route.includes("TOTAL_TIMEOUT_MS"));
-check("남은 시간만큼만 준다", route.includes("Math.min(CALL_TIMEOUT_MS, left)"));
-check("남은 시간이 없으면 부르지 않는다", route.includes("if (left <= 0) throw"));
+check("키가 없으면 안내만 낸다", route.includes("GEMINI_API_KEY"));
+check("요청 전체에 시간을 끊는다", route.includes("TOTAL_TIMEOUT_MS"));
 check(
   "요청에 들어서자마자 잰다",
   route.indexOf("const deadline") < route.indexOf("GEMINI_API_KEY"),
 );
-// 토큰 검증과 Firestore 도 자체 제한이 없다. 늦으면 참가자가 그대로 기다린다.
-check("토큰 검증에도 시간을 끊는다", route.includes("withDeadline(getAdminAuth()"));
 check("본문 읽기도 시간 안에 둔다", route.includes("withDeadline(request.json()"));
+check("단계 조회도 시간 안에 둔다", route.includes("withDeadline(\n        who.db"));
+
+const panel = readFileSync(new URL("../components/TutorPanel.tsx", import.meta.url), "utf8");
+check("화면이 토큰을 실어 보낸다", panel.includes("Bearer ${idToken}"));
+
+// 8. 부르는 장치는 한 곳에 있다. 튜터와 캐묻기가 함께 쓴다.
+const gemini = readFileSync(new URL("../lib/gemini.ts", import.meta.url), "utf8");
+check("입장 토큰을 검증한다", gemini.includes("verifyIdToken"));
+check("그 이름의 주인인지 본다", gemini.includes("ownerUid !== uid"));
+check("횟수를 함께 쓰는 곳에 센다", gemini.includes("runTransaction"));
+check("키를 응답에 흘리지 않는다", !gemini.includes("await res.text()"));
+// 생각하는 토큰까지 이 한도에서 나간다. 좁으면 답이 중간에 끊긴다.
+check("답이 잘리지 않을 만큼 준다", /maxOutputTokens:\s*2048/.test(gemini));
+check("길게 생각하지 않게 한다", gemini.includes('thinkingLevel: "low"'));
+check("설정을 모르는 모델이면 빼고 다시 부른다", gemini.includes("res.status === 400"));
+check("답한 모델을 기억한다", gemini.includes("lastGood = model"));
+check("모델마다 시간을 끊는다", gemini.includes("AbortSignal.timeout("));
+check("남은 시간만큼만 준다", gemini.includes("Math.min(CALL_TIMEOUT_MS, left)"));
+check("남은 시간이 없으면 부르지 않는다", gemini.includes("if (left <= 0) throw"));
+check("토큰 검증에도 시간을 끊는다", gemini.includes("withDeadline(getAdminAuth()"));
 check(
   "늦은 것과 틀린 것을 가른다",
-  (route.match(/e instanceof DeadlineError/g) ?? []).length >= 2,
+  (gemini.match(/e instanceof DeadlineError/g) ?? []).length >= 1,
 );
 check(
-  "Firestore 세 곳 모두 시간을 끊는다",
-  (route.match(/withDeadline\(/g) ?? []).length >= 4,
-  `${(route.match(/withDeadline\(/g) ?? []).length}곳`,
+  "Firestore 도 시간을 끊는다",
+  (gemini.match(/withDeadline\(/g) ?? []).length >= 3,
+  `${(gemini.match(/withDeadline\(/g) ?? []).length}곳`,
 );
-check("끊기면 다음 모델로 간다", /console\.error\(`tutor: \$\{model\} 응답 없음`\);\s*lastStatus = 504;\s*continue;/.test(route));
+check(
+  "끊기면 다음 모델로 간다",
+  /console\.error\(`gemini: \$\{model\} 응답 없음`\);\s*lastStatus = 504;\s*continue;/.test(gemini),
+);
 // 본문 읽기가 try 밖에 있으면 잘못된 JSON 하나로 폴백 없이 끝난다.
 check(
   "본문 읽기도 같은 try 안에 있다",
-  route.indexOf("await res.json()") > route.indexOf("let reply: string | null = null;") &&
-    route.indexOf("await res.json()") < route.indexOf("tutor: ${model} 응답 없음"),
+  gemini.indexOf("await res.json()") >
+    gemini.indexOf("let reply: string | null = null;") &&
+    gemini.indexOf("await res.json()") < gemini.indexOf("gemini: ${model} 응답 없음"),
 );
 
 const envExample = readFileSync(new URL("../.env.example", import.meta.url), "utf8");

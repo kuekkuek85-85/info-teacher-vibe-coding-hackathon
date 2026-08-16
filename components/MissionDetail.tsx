@@ -5,11 +5,12 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import CarryoverPanel from "@/components/CarryoverPanel";
+import GrillPanel from "@/components/GrillPanel";
 import MissionForm from "@/components/MissionForm";
 import PeerReviewSection from "@/components/PeerReviewSection";
 import PeerToolLinks from "@/components/PeerToolLinks";
 import PromptCard from "@/components/PromptCard";
-import { buildPromptText, withDraft } from "@/lib/promptCard";
+import { buildPromptText, liveData } from "@/lib/promptCard";
 import type { Mission, MissionTool, Progress } from "@/lib/types";
 
 const GATE_MISSIONS = new Set(["m5", "m8"]);
@@ -55,12 +56,19 @@ export default function MissionDetail({
   const card = mission.promptCard ? (
     <PromptCard
       key={mission.id}
-      text={buildPromptText(mission, missions, withDraft(progress, mission.id, draft))}
+      text={buildPromptText(mission, missions, progress)}
       storageKey={`prompt:${name}:${mission.id}`}
       filled={Boolean(mission.promptFill)}
       tool={mission.promptTool ?? mission.tool}
     />
   ) : null;
+
+  // m2 는 적은 자리에서 바로 캐묻는다. 지금 치고 있는 값을 그대로 보낸다.
+  const live = liveData(progress, mission.id, draft);
+  const grill =
+    mission.id === "m2" ? (
+      <GrillPanel name={name} idea={live.oneline ?? ""} roles={live.user ?? ""} />
+    ) : null;
 
   return (
     <>
@@ -90,7 +98,7 @@ export default function MissionDetail({
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{mission.guide}</ReactMarkdown>
         </div>
 
-        {mission.promptCard && !mission.promptCardAfter ? card : null}
+        {card}
 
         {mission.id === "m8" ? <PeerToolLinks target={progress?.reviewTarget} /> : null}
 
@@ -114,9 +122,9 @@ export default function MissionDetail({
           name={name}
           onSave={onSave}
           onSubmit={onSubmit}
-          onValuesChange={mission.promptCardAfter ? setDraft : undefined}
-          slot={mission.promptCardAfter ? card : undefined}
-          slotAfter={mission.promptCardAfter}
+          onValuesChange={grill ? setDraft : undefined}
+          slot={grill ?? undefined}
+          slotAfter={grill ? "user" : undefined}
         />
 
         {mission.id === "m5" ? (

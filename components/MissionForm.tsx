@@ -39,17 +39,21 @@ export default function MissionForm({
   const entry = progress?.missions?.[mission.id];
   const submitted = entry?.status === "submitted";
 
-  const { status, savedAt, queue, flush, readBackup } = useDebouncedSave(
+  const { status, savedAt, queue, backup, flush, readBackup } = useDebouncedSave(
     name,
     mission.id,
     onSave,
   );
 
   const [values, setValues] = useState<Record<string, string>>({});
+  // 서버 값을 받기 전에는 제출하지 않는다. 빈 데이터로 제출 표시만 남는다.
+  const [ready, setReady] = useState(false);
   const [restoredNotice, setRestoredNotice] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const initialized = useRef(false);
+  // 초기화 전에 적은 것. 늦게 온 스냅샷이 이것을 덮어쓰면 안 된다.
+  const typed = useRef<Record<string, string>>({});
 
   const prefillTarget = (mission.prefill as { targetKey?: string } | undefined)?.targetKey;
   const prefillText = useMemo(() => buildPrefill(mission, progress), [mission, progress]);
@@ -67,6 +71,9 @@ export default function MissionForm({
       setRestoredNotice(true);
     }
 
+    // 서버 응답이 늦으면 그 사이에 이미 적고 있을 수 있다. 적은 것이 이긴다.
+    Object.assign(base, typed.current);
+
     // 프리필은 화면에만 넣으면 손대지 않고 제출했을 때 빈 값으로 남는다. 저장까지 예약한다.
     let prefilled = false;
     if (prefillTarget && !base[prefillTarget]?.trim() && prefillText) {
@@ -76,14 +83,21 @@ export default function MissionForm({
 
     setValues(base);
     initialized.current = true;
+    setReady(true);
     onValuesChange?.(base);
-    if (backup || prefilled) queue(base);
+    // 초기화 전에 적은 것이 있으면 여기서 처음 올린다
+    if (backup || prefilled || Object.keys(typed.current).length > 0) queue(base);
   }, [progress, entry, readBackup, queue, prefillTarget, prefillText]);
 
   const update = (key: string, value: string) => {
     const next = { ...values, [key]: value };
+    typed.current = next;
     setValues(next);
-    queue(next);
+    // 저장은 data 를 통째로 덮어쓴다. 초기화 전에는 앞서 적어 둔 칸이 아직 없어
+    // 지금 친 것만 올라간다. 초기화가 끝난 뒤에 한꺼번에 올린다.
+    // 그 사이에도 이 브라우저에는 남겨 둔다. 창을 닫아도 잃지 않는다.
+    if (initialized.current) queue(next);
+    else backup(next);
     // 카드가 이 값을 바로 받아 간다. 저장을 기다리면 방금 적은 것이 빠진다.
     onValuesChange?.(next);
   };
@@ -231,12 +245,14 @@ export default function MissionForm({
         <button
           type="button"
           onClick={submit}
-          disabled={submitting}
+          disabled={submitting || !ready}
           className="btn-primary"
         >
           {submitted ? "다시 제출하기" : "제출하기"}
         </button>
-        <span className="body-sm">제출 후에도 수정됩니다</span>
+        <span className="body-sm">
+          {ready ? "제출 후에도 수정됩니다" : "불러오는 중입니다. 곧 제출할 수 있습니다"}
+        </span>
       </div>
 
       {submitError ? (

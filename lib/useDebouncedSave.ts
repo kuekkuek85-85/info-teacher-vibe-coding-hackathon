@@ -65,6 +65,21 @@ export function useDebouncedSave(
     [key, run],
   );
 
+  /**
+   * 서버에 올리지 않고 이 브라우저에만 남긴다.
+   * 아직 서버 값을 못 받은 동안에는 올리면 앞서 적어 둔 칸이 지워진다.
+   */
+  const backup = useCallback(
+    (data: Record<string, string>) => {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch {
+        // 저장소가 막혔으면 이번 화면에서만 유지된다
+      }
+    },
+    [key],
+  );
+
   const flush = useCallback((): Promise<boolean> => {
     clearTimeout(timer.current);
     return run();
@@ -98,5 +113,5 @@ export function useDebouncedSave(
     }
   }, [key]);
 
-  return { status, savedAt, queue, flush, readBackup };
+  return { status, savedAt, queue, backup, flush, readBackup };
 }

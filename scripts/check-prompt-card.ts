@@ -1,7 +1,7 @@
 // 프롬프트 카드에 내 제출물이 제대로 들어가는지 확인한다.
 // 실행: node scripts/check-prompt-card.ts
 import { readFileSync } from "node:fs";
-import { buildPromptText, withDraft } from "../lib/promptCard.ts";
+import { buildPromptText, liveData } from "../lib/promptCard.ts";
 import type { Mission, Progress } from "../lib/types.ts";
 
 let failures = 0;
@@ -104,23 +104,18 @@ const broken: Mission = {
 };
 check("출처 미션이 없으면 원본 그대로", buildPromptText(broken, missions, null) === m4.promptCard);
 
-// 8. 저장 전에 적은 값도 카드에 들어가야 한다. 같은 미션에서 끌어오면 티가 크다.
-const saved = withData({ problem: "저장된 문장" });
-const live = withDraft(saved, "m3", { problem: "방금 적은 문장", mvp: "방금 적은 MVP" });
-check("얹은 값이 이긴다", live?.missions.m3.data.problem === "방금 적은 문장");
-check("안 얹은 칸은 그대로", live?.missions.m3.data.mvp === "방금 적은 MVP");
+// 8. 저장 전에 적은 값도 화면이 바로 써야 한다. 저장을 기다리면 방금 적은 것이 빠진다.
+const saved = withData({ problem: "저장된 문장", mvp: "저장된 MVP" });
+const live = liveData(saved, "m3", { problem: "방금 적은 문장" });
+check("얹은 값이 이긴다", live.problem === "방금 적은 문장");
+check("안 얹은 칸은 저장된 값이 남는다", live.mvp === "저장된 MVP");
 check("원본을 건드리지 않는다", saved.missions.m3.data.problem === "저장된 문장");
-check("빈 초안이면 그대로 돌려준다", withDraft(saved, "m3", {}) === saved);
-check("초안이 없으면 그대로 돌려준다", withDraft(saved, "m3", null) === saved);
-check("문서가 없으면 만들지 않는다", withDraft(null, "m3", { problem: "x" }) === null);
-check(
-  "카드가 얹은 값을 쓴다",
-  buildPromptText(m4, missions, live).includes("방금 적은 문장"),
-);
-check(
-  "적은 적 없는 미션에도 얹힌다",
-  withDraft(saved, "m9", { readme_url: "x" })?.missions.m9.status === "draft",
-);
+check("초안이 없으면 저장된 값만", liveData(saved, "m3", null).problem === "저장된 문장");
+check("빈 초안도 마찬가지", liveData(saved, "m3", {}).mvp === "저장된 MVP");
+// 진행 문서가 아직 없어도 방금 적은 것은 살아야 한다
+check("문서가 없어도 적은 것은 남는다", liveData(null, "m3", { problem: "x" }).problem === "x");
+check("문서도 초안도 없으면 빈 값", Object.keys(liveData(null, "m3", null)).length === 0);
+check("적은 적 없는 미션이면 빈 값", Object.keys(liveData(saved, "m9", null)).length === 0);
 
 // 9. 미션을 옮겨도 앞 카드에서 고친 내용이 따라오면 안 된다.
 // 화면 상태라 조립 함수로는 못 잡는다. 두 장치가 사라지면 여기서 잡는다.
@@ -140,9 +135,29 @@ check(
   "제출 양식도 미션마다 새로 만들어진다",
   /<MissionForm\s+key=\{mission\.id\}/.test(detail),
 );
-// 적는 순서가 있는 자리에서는 카드가 칸 사이에 선다
-check("카드를 칸 사이에 끼울 수 있다", detail.includes("slotAfter={mission.promptCardAfter}"));
-check("끼울 때는 위에 또 그리지 않는다", detail.includes("!mission.promptCardAfter ? card"));
+// 서버 응답이 늦는 사이에 적은 것을 늦게 온 스냅샷이 덮으면 안 된다
+const form = readFileSync(new URL("../components/MissionForm.tsx", import.meta.url), "utf8");
+check("초기화 전에 적은 것을 붙들어 둔다", form.includes("typed.current = next"));
+check("늦게 온 값보다 적은 것이 이긴다", form.includes("Object.assign(base, typed.current)"));
+// 저장은 data 를 통째로 덮어쓴다. 초기화 전에 올리면 앞서 적은 칸이 지워진다.
+check("초기화 전에는 저장하지 않는다", form.includes("if (initialized.current) queue(next)"));
+check(
+  "초기화 뒤에 한꺼번에 올린다",
+  form.includes("Object.keys(typed.current).length > 0) queue(base)"),
+);
+// 올리지 못하는 동안에도 잃지 않고, 빈 채로 제출되지도 않아야 한다
+check("올리기 전에도 이 브라우저에 남긴다", form.includes("else backup(next)"));
+check("서버 값을 받기 전에는 제출을 막는다", form.includes("disabled={submitting || !ready}"));
+const save = readFileSync(new URL("../lib/useDebouncedSave.ts", import.meta.url), "utf8");
+check("보관만 하는 길이 있다", save.includes("const backup = useCallback"));
+check(
+  "보관은 서버를 부르지 않는다",
+  !save.slice(save.indexOf("const backup = useCallback"), save.indexOf("const flush")).includes(
+    "setTimeout(run",
+  ),
+);
+// 적는 순서가 있는 자리에서는 도구가 칸 사이에 선다
+check("칸 사이에 끼울 수 있다", detail.includes('slotAfter={grill ? "user" : undefined}'));
 check("미션을 옮기면 얹은 값을 비운다", detail.includes("setDraft(null), [mission.id]"));
 // 카드 머리말은 진행 방식 셋을 모두 처리해야 한다
 for (const [tool, label] of Object.entries({
