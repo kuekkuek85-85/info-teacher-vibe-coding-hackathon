@@ -1,22 +1,35 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { MissionTool } from "@/lib/types";
+
+const LABEL: Record<MissionTool, string> = {
+  human: "옮겨 적을 카드",
+  chat: "AI 대화창에 붙여넣을 카드",
+  agent: "클로드 코드에 붙여넣을 카드",
+};
 
 /**
- * AI에 붙여넣을 카드. 채울 것이 있으면 내 제출물이 들어간 채로 열린다.
+ * 어딘가에 옮겨 붙일 카드. 머리말은 미션의 진행 방식에 따라 갈린다.
+ * 채울 것이 있으면 내 제출물이 들어간 채로 열린다.
  * 고친 내용은 이 브라우저에만 둔다. 제출물이 아니라 보내기 전 메모다.
  */
 export default function PromptCard({
   text,
   storageKey,
   filled = false,
+  tool = "human",
 }: {
   text: string;
   /** 고친 내용을 이 브라우저에 남길 키. 없으면 남기지 않는다 */
   storageKey?: string;
   /** 내 제출물이 자동으로 채워지는 카드인지. m8 처럼 아닌 것도 있다 */
   filled?: boolean;
+  /** 어디에 붙여넣는 카드인지. 미션의 진행 방식을 그대로 받는다 */
+  tool?: MissionTool;
 }) {
+  // human 단계에도 카드를 두면 어디에 붙여넣을지 말해야 한다.
+  const label = LABEL[tool];
   const [edited, setEdited] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   // null 로 시작해서 storageKey 가 없을 때도 첫 실행이 한 번은 돈다
@@ -79,7 +92,7 @@ export default function PromptCard({
     <section className="card">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="eyebrow">AI에 붙여넣을 카드</p>
+          <p className="eyebrow">{label}</p>
           <p className="body-sm mt-2">
             {filled
               ? "내가 적은 내용이 이미 들어가 있습니다. 고쳐서 복사하세요."
@@ -107,7 +120,7 @@ export default function PromptCard({
         value={value}
         onChange={(e) => update(e.target.value)}
         spellCheck={false}
-        aria-label="AI에 붙여넣을 카드"
+        aria-label={label}
       />
     </section>
   );

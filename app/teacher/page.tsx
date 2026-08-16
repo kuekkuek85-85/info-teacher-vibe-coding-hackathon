@@ -244,6 +244,12 @@ export default function TeacherPage() {
   const deployed = Object.values(people).filter(
     (p) => p.missions?.m7?.status === "submitted",
   );
+  // 배정이 없으면 m5 검토도 m8 동료 도구도 비어 보인다.
+  // 명단 기준으로 센다. 아직 입장하지 않아 문서가 없는 사람도 빠지면 안 된다.
+  const unassigned = roster
+    .filter((r) => r.role === "student" && !people[r.name]?.reviewTarget)
+    .map((r) => r.name)
+    .sort((a, b) => a.localeCompare(b, "ko"));
   // README 를 올린 순서가 곧 발표 순서다.
   const readmeReady = readmeOrder(Object.values(people));
   const readmeRank = readmeRanks(Object.values(people));
@@ -363,6 +369,12 @@ export default function TeacherPage() {
             동료 검토 셔플 배정
           </button>
         </div>
+        {/* m5 검토도 m8 의 "동료 도구 써 보기" 도 배정이 있어야 돌아간다. */}
+        <p className="body-sm mt-4">
+          {unassigned.length === 0
+            ? "명단의 학생 모두 검토 상대가 있습니다."
+            : `검토 상대가 없는 학생 ${unassigned.length}명: ${unassigned.join(", ")}`}
+        </p>
       </section>
 
       <section className="mt-16">

@@ -1,4 +1,17 @@
-export type FieldType = "text" | "textarea" | "url" | "select" | "checklist";
+export type FieldType =
+  | "text"
+  | "textarea"
+  | "url"
+  | "select"
+  | "checklist"
+  /** 항목마다 체크와 한 줄 설명을 함께 받는다 */
+  | "roles";
+
+/**
+ * 이 단계를 무엇으로 하는지.
+ * human 은 사람이 직접 적는 칸, chat 은 대화형 AI, agent 는 코딩 에이전트다.
+ */
+export type MissionTool = "human" | "chat" | "agent";
 
 export interface MissionField {
   key: string;
@@ -20,6 +33,7 @@ export interface Mission {
   stepLabel: string;
   order: number;
   session: string;
+  tool: MissionTool;
   guide: string;
   promptCard?: string;
   /** 프롬프트 카드의 자리표시자에 채울 내 제출물 */

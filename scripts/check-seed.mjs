@@ -15,21 +15,44 @@ const check = (label, ok, extra = "") => {
 };
 
 const expected = {
-  m1: { order: 1, fields: ["prep", "during", "assess", "feedback"], vis: "private" },
-  m2: { order: 2, fields: ["oneline", "user"], vis: "public" },
-  m3: { order: 3, fields: ["problem", "mvp", "context", "p1", "stack"], vis: "name" },
-  m4: { order: 4, fields: ["scenario", "wireframe", "test_design"], vis: "name" },
-  m5: { order: 5, fields: ["accepted", "rejected"], vis: "name" },
-  m6: { order: 6, fields: ["first_prompt", "red_count"], vis: "name" },
-  m7: { order: 7, fields: ["green_count", "deploy_url", "repo_url", "remaining"], vis: "public" },
+  m1: { order: 1, fields: ["prep", "during", "assess", "feedback"], vis: "private", tool: "human" },
+  m2: { order: 2, fields: ["oneline", "user"], vis: "public", tool: "human" },
+  m3: {
+    order: 3,
+    fields: ["problem", "mvp", "context", "p1", "stack"],
+    vis: "name",
+    tool: "chat",
+  },
+  m4: { order: 4, fields: ["scenario", "wireframe", "test_design"], vis: "name", tool: "chat" },
+  m5: { order: 5, fields: ["accepted", "rejected"], vis: "name", tool: "chat" },
+  m6: { order: 6, fields: ["first_prompt", "red_count"], vis: "name", tool: "agent" },
+  m7: {
+    order: 7,
+    fields: ["green_count", "deploy_url", "repo_url", "remaining"],
+    vis: "public",
+    tool: "agent",
+  },
   m8: {
     order: 8,
     fields: ["accepted", "rejected", "commit_msg", "pushed", "peer_feedback"],
     vis: "name",
+    tool: "agent",
+  },
+  m9: {
+    order: 9,
+    fields: ["readme_url", "demo_plan", "demo_data"],
+    vis: "public",
+    tool: "agent",
+  },
+  m10: {
+    order: 10,
+    fields: ["about_hackathon", "about_output", "about_subject", "overall"],
+    vis: "name",
+    tool: "human",
   },
 };
 
-check("미션 8종", missions.length === 8, `개수=${missions.length}`);
+check("미션 10종", missions.length === 10, `개수=${missions.length}`);
 
 for (const [id, want] of Object.entries(expected)) {
   const m = missions.find((x) => x.id === id);
@@ -44,6 +67,8 @@ for (const [id, want] of Object.entries(expected)) {
     m.fields.map((f) => f.key).join(","),
   );
   check(`${id} 공개 범위`, m.visibility === want.vis, m.visibility);
+  // 진행 방식이 셋으로 갈린다. 화면 색과 카드 문구가 이 값을 따른다.
+  check(`${id} 도구`, m.tool === want.tool, m.tool);
   check(`${id} 안내문 있음`, typeof m.guide === "string" && m.guide.length > 20);
   check(`${id} 잠긴 상태로 시작`, m.open === undefined, "시딩 시 open=false 로 강제");
 }
@@ -186,6 +211,28 @@ check(
   "m8 동료 칸 이름",
   m8.fields.find((f) => f.key === "peer_feedback").label ===
     "내 동료의 도구를 써 보고 남긴 한 줄",
+);
+
+// m2 사용자 칸은 체크와 역할을 함께 받는다
+const userField = m2.fields.find((f) => f.key === "user");
+check("m2 사용자 칸이 역할 입력이다", userField.type === "roles", userField.type);
+check(
+  "m2 사용자 보기 셋",
+  JSON.stringify(userField.options) === JSON.stringify(["학생", "교사", "학부모"]),
+  JSON.stringify(userField.options),
+);
+
+// 발표와 회고
+const m9 = missions.find((m) => m.id === "m9");
+const m10 = missions.find((m) => m.id === "m10");
+check("m9 가 발표 단계다", m9.stepLabel === "발표", m9.stepLabel);
+check("m9 안내가 README 하나로 간다", m9.guide.includes("README 하나로"));
+check("m10 이 회고 단계다", m10.stepLabel === "회고", m10.stepLabel);
+check(
+  "m10 이 네 방향을 묻는다",
+  ["해커톤에 대해", "내 산출물에 대해", "정보 교과에 대해", "전반적인 성찰"].every((l) =>
+    m10.fields.some((f) => f.label === l),
+  ),
 );
 
 const m3problem = missions

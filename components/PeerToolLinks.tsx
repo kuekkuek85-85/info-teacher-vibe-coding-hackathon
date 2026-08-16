@@ -44,7 +44,9 @@ export default function PeerToolLinks({ target }: { target?: string }) {
       </div>
 
       {!target ? (
-        <p className="mt-4">검토 상대가 아직 배정되지 않았습니다.</p>
+        <p className="mt-4">
+          검토 상대가 아직 배정되지 않았습니다. 강사에게 배정을 요청해 주세요.
+        </p>
       ) : failed ? (
         <p className="body-sm mt-4">
           상대의 제출물을 불러오지 못했습니다. 연결을 확인하고 새로고침해 주세요.

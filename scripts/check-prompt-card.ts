@@ -113,6 +113,22 @@ check(
   /<PromptCard\s+key=\{mission\.id\}/.test(page),
   "page.tsx 의 key 프롭",
 );
+// 카드 머리말은 진행 방식 셋을 모두 처리해야 한다
+for (const [tool, label] of Object.entries({
+  human: "옮겨 적을 카드",
+  chat: "AI 대화창에 붙여넣을 카드",
+  agent: "클로드 코드에 붙여넣을 카드",
+})) {
+  check(
+    `${tool} 카드 머리말`,
+    new RegExp(`${tool}:\\s*"${label}"`).test(component),
+    label,
+  );
+}
+check(
+  "머리말에 남은 갈래가 없다",
+  (component.match(/Record<MissionTool, string>/g) ?? []).length === 1,
+);
 check(
   "저장값이 없으면 편집 상태를 비운다",
   component.includes("setEdited(localStorage.getItem(storageKey))"),

@@ -94,7 +94,9 @@ export default function PeerReviewSection({
         </div>
 
         {!target ? (
-          <p className="mt-4">검토 상대가 아직 배정되지 않았습니다.</p>
+          <p className="mt-4">
+            검토 상대가 아직 배정되지 않았습니다. 강사에게 배정을 요청해 주세요.
+          </p>
         ) : (
           <div className="mt-6 space-y-6">
             {REVIEW_SOURCE.map(({ mission, keys }) => {

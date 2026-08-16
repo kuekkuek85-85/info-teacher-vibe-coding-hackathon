@@ -1,7 +1,8 @@
 // 해커톤 베이스캠프 시딩 스크립트
 // 실행: node scripts/seed.mjs
-// roster(명단) + codes(입장 코드) + missions(m1~m8) + config/global 을 Firestore에 넣는다.
-// 미션 안내문·필드·프롬프트 카드는 원고-실습콘텐츠-이승엽파트.md §B 원문을 그대로 옮겼다.
+// roster(명단) + codes(입장 코드) + missions(m1~m10) + config/global 을 Firestore에 넣는다.
+// m1~m8 의 안내문·필드·프롬프트 카드는 원고-실습콘텐츠-이승엽파트.md §B 원문을 그대로 옮겼다.
+// m9 발표·m10 회고는 원고 밖에서 추가한 것이라 대조할 원문이 없다.
 
 import { readFileSync } from "node:fs";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
@@ -65,7 +66,8 @@ roster.push(...extraAccounts);
 // 개인별 코드를 쓰던 흔적(codes 컬렉션)은 시딩할 때 지운다.
 
 // ─────────────────────────────────────────────────────────────
-// 2. 미션 8종
+// 2. 미션 10종. tool 이 진행 방식을 가른다.
+//    human 은 사람이 직접(m1·m2·m10), chat 은 대화형 AI(m3~m5), agent 는 클로드 코드(m6~m9).
 // ─────────────────────────────────────────────────────────────
 const missions = [
   {
@@ -74,6 +76,7 @@ const missions = [
     title: "내 수업 병목 찾기",
     stepLabel: "발견",
     session: "2일차 아침",
+    tool: "human",
     visibility: "private",
     guide:
       "잘하고 싶은 것 말고 아픈 것을 적습니다. 매주 반복되는 일, 학생을 기다리게 하는 순간, 아직 손으로 하는 작업이면 전부 병목입니다. 국면마다 하나 이상 적어 주세요.",
@@ -111,12 +114,19 @@ const missions = [
     title: "아이디어 한 줄",
     stepLabel: "발견",
     session: "2일차 아침",
+    tool: "human",
     visibility: "public",
     guide:
       "한 문장이면 됩니다. 누가, 무엇 때문에 힘든데, 어떤 도구가 있으면 되는지 적어 주세요. 바로 다음 단계에서 이 문장을 PRD로 키우니 완성도는 신경 쓰지 마세요.",
     fields: [
       { key: "oneline", label: "아이디어 한 줄", type: "textarea" },
-      { key: "user", label: "이 도구의 사용자 (학생/교사/학부모)", type: "text" },
+      {
+        key: "user",
+        label: "이 도구의 사용자와 그 사람이 하는 일",
+        type: "roles",
+        options: ["학생", "교사", "학부모"],
+        placeholder: "이 사람이 무엇을 하는지 한 줄로",
+      },
     ],
     carryover: [],
   },
@@ -126,6 +136,7 @@ const missions = [
     title: "PRD 작성",
     stepLabel: "기획",
     session: "스프린트 1",
+    tool: "chat",
     visibility: "name",
     guide:
       "클로드와 대화하며 아이디어를 PRD로 키우고 핵심만 아래에 정리합니다. PRD는 AI에게 시킬 말을 미리 적어 보는 문서입니다. 12시의 나에게 지킬 수 있는 약속만 적으세요.",
@@ -169,6 +180,7 @@ const missions = [
     title: "구현 계획",
     stepLabel: "기획",
     session: "스프린트 1",
+    tool: "chat",
     visibility: "name",
     guide:
       "PRD를 클로드에 주고 사용자 시나리오, 화면 와이어프레임, 테스트 케이스 설계를 뽑게 하세요. 테스트 케이스는 여기서 설계까지만 합니다. 코드로 옮기는 일은 m6에서 합니다.",
@@ -203,6 +215,7 @@ const missions = [
     title: "계획 검토 게이트",
     stepLabel: "검토①",
     session: "스프린트 1",
+    tool: "chat",
     visibility: "name",
     guide:
       "클로드(혹은 Chat GPT 등) 새 대화를 열어 아래 카드로 계획을 검토받으세요. 같이 만든 대화의 클로드는 자기 계획에 관대해서, 맥락 없는 새 대화가 남의 눈 노릇을 합니다. 지적은 수용과 거부로 나눠 이유와 함께 기록합니다. 전부 수용했다면 그것도 검증을 포기한 셈입니다. 동료 검토도 여기서 합니다. 배정된 상대의 m3와 m4를 열람하고 체크리스트와 코멘트를 남겨 주세요.",
@@ -241,6 +254,7 @@ const missions = [
     title: "테스트 코드 작성 · RED",
     stepLabel: "구현 1차",
     session: "스프린트 2",
+    tool: "agent",
     visibility: "name",
     guide:
       "구현 전에 채점 기준부터 만듭니다. 테스트 케이스 설계를 실패하는 테스트 코드로 옮기고, 빨갛게 실패하는 화면까지 확인해야 이 미션이 끝납니다.",
@@ -274,6 +288,7 @@ const missions = [
     title: "구현·통과 · GREEN + 배포",
     stepLabel: "구현 2차",
     session: "스프린트 2",
+    tool: "agent",
     visibility: "public",
     guide:
       '이번 스텝의 지시문은 하나입니다. "이 테스트를 통과시키는 최소한의 구현을 해줘." 통과했으면 Github 커밋, 푸시까지 가고, 배포까지 갑니다. 안 되는 부분이 있어도 괜찮으니 남은 일에 적어 두세요. 그것도 제출입니다.',
@@ -296,6 +311,7 @@ const missions = [
     title: "리팩토링 · REFACTOR + 코드 검토 + 푸시",
     stepLabel: "검토②·마감",
     session: "스프린트 2~3",
+    tool: "agent",
     visibility: "name",
     guide:
       "코드의 리팩토링을 검토받고, 무엇을 받아들일지 정한 뒤 다듬습니다. 마지막은 커밋과 푸시인데 이것만은 본인 손으로 하세요. 저장소에 남는 기록은 AI가 아니라 여러분의 결정이니까요.",
@@ -314,6 +330,76 @@ const missions = [
       { key: "peer_feedback", label: "내 동료의 도구를 써 보고 남긴 한 줄", type: "textarea" },
     ],
     carryover: [{ fromMission: "m7", fromKey: "repo_url", label: "m7 깃허브 저장소" }],
+  },
+  {
+    id: "m9",
+    order: 9,
+    title: "발표 · README로 5분",
+    stepLabel: "발표",
+    session: "2일차 오후",
+    tool: "agent",
+    visibility: "public",
+    guide:
+      "발표 자료를 따로 만들지 않습니다. 저장소의 README 하나로 5분 동안 말하고, 중간에 도구를 켜서 보여 줍니다. 아래 버튼으로 초안을 열면 지금까지 적은 것이 이미 들어가 있습니다. 고쳐서 저장소에 올린 다음 올렸다고 표시해 주세요.",
+    fields: [
+      {
+        key: "readme_url",
+        label: "README 주소",
+        type: "url",
+        placeholder: "예) https://github.com/이름/저장소#readme",
+      },
+      {
+        key: "demo_plan",
+        label: "5분 동안 보여 줄 순서",
+        type: "textarea",
+        placeholder: "예) 문제 1분, 시연 2분, 안 된 것 1분, 다음 계획 1분",
+      },
+      {
+        key: "demo_data",
+        label: "시연에 쓸 예시 데이터",
+        type: "textarea",
+        placeholder: "학생 실명은 넣지 마세요. 가상의 값으로 준비하세요",
+      },
+    ],
+    carryover: [{ fromMission: "m7", fromKey: "deploy_url", label: "m7 배포 주소" }],
+  },
+  {
+    id: "m10",
+    order: 10,
+    title: "회고",
+    stepLabel: "회고",
+    session: "2일차 오후",
+    tool: "human",
+    visibility: "name",
+    guide:
+      "마지막 칸입니다. 잘된 것보다 막혔던 자리가 다음 수업에 쓸모가 큽니다. 네 칸 모두 두세 문장이면 충분합니다.",
+    fields: [
+      {
+        key: "about_hackathon",
+        label: "해커톤에 대해",
+        type: "textarea",
+        placeholder: "이틀의 흐름에서 도움이 된 것과 빠졌으면 하는 것",
+      },
+      {
+        key: "about_output",
+        label: "내 산출물에 대해",
+        type: "textarea",
+        placeholder: "만든 것 중 쓸 만한 것과 다시 만든다면 바꿀 것",
+      },
+      {
+        key: "about_subject",
+        label: "정보 교과에 대해",
+        type: "textarea",
+        placeholder: "이 방식을 수업 어디에 넣을 수 있는지",
+      },
+      {
+        key: "overall",
+        label: "전반적인 성찰",
+        type: "textarea",
+        placeholder: "동료에게 한 줄로 남긴다면",
+      },
+    ],
+    carryover: [],
   },
 ];
 

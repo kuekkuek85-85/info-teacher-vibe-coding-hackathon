@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Mission, Progress } from "@/lib/types";
+import { formatRoles, parseRoles } from "@/lib/roleField";
 import { useDebouncedSave } from "@/lib/useDebouncedSave";
 
 function buildPrefill(mission: Mission, progress: Progress | null): string | null {
@@ -144,6 +145,38 @@ export default function MissionForm({
                   </option>
                 ))}
               </select>
+            ) : field.type === "roles" ? (
+              <span className="mt-3 block space-y-3">
+                {parseRoles(values[field.key], field.options ?? []).map((row, i, rows) => (
+                  <span key={row.option} className="flex flex-wrap items-center gap-3">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5 accent-black"
+                      checked={row.checked}
+                      aria-label={`${row.option} 사용`}
+                      onChange={(e) => {
+                        const next = [...rows];
+                        next[i] = { ...row, checked: e.target.checked };
+                        update(field.key, formatRoles(next));
+                      }}
+                    />
+                    <span className="body-lg link-strong w-[64px]">{row.option}</span>
+                    <input
+                      className="text-input flex-1"
+                      style={{ minWidth: 200 }}
+                      type="text"
+                      placeholder={field.placeholder}
+                      aria-label={`${row.option} 역할`}
+                      value={row.detail}
+                      onChange={(e) => {
+                        const next = [...rows];
+                        next[i] = { ...row, detail: e.target.value };
+                        update(field.key, formatRoles(next));
+                      }}
+                    />
+                  </span>
+                ))}
+              </span>
             ) : field.type === "checklist" ? (
               <span className="mt-2 block space-y-2">
                 {(field.options ?? []).map((o) => {

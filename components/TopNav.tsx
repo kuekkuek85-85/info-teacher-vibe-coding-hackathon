@@ -28,14 +28,11 @@ export default function TopNav({
             <Link href="/plaza" className="link-strong body-sm py-2">
               광장
             </Link>
-            <Link href="/readme" className="link-strong body-sm py-2">
-              발표 README
-            </Link>
             <Link href="/cases" className="link-strong body-sm py-2">
-              수업 사례
+              강사 수업 사례
             </Link>
             <Link href="/making" className="link-strong body-sm py-2">
-              만든 과정
+              이 웹 앱을 만든 과정
             </Link>
           </nav>
 
@@ -45,14 +42,11 @@ export default function TopNav({
               <Link href="/plaza" className="link-strong body-sm block py-2">
                 광장
               </Link>
-              <Link href="/readme" className="link-strong body-sm block py-2">
-                발표 README
-              </Link>
               <Link href="/cases" className="link-strong body-sm block py-2">
-                수업 사례
+                강사 수업 사례
               </Link>
               <Link href="/making" className="link-strong body-sm block py-2">
-                만든 과정
+                이 웹 앱을 만든 과정
               </Link>
             </div>
           </details>
