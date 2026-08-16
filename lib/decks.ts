@@ -16,6 +16,8 @@ export const DECKS: Deck[] = [
   { id: "m3", title: "PRD", count: 1 },
   { id: "m4", title: "구현 계획", count: 2 },
   { id: "m5", title: "오케스트레이션", count: 1 },
+  { id: "m8", title: "리팩토링", count: 1 },
+  { id: "m9", title: "공유 및 발표(README)", count: 1 },
 ];
 
 export function findDeck(id: string | undefined | null): Deck | null {

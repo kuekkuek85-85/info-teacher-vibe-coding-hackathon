@@ -21,6 +21,8 @@ const EXPECTED: Record<string, string> = {
   m3: "PRD",
   m4: "구현 계획",
   m5: "오케스트레이션",
+  m8: "리팩토링",
+  m9: "공유 및 발표(README)",
 };
 for (const [id, title] of Object.entries(EXPECTED)) {
   const d = findDeck(id);
