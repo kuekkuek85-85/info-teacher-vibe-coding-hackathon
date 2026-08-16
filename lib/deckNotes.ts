@@ -6,6 +6,7 @@ import m2Notes from "./notes/m2.ts";
 import m3Notes from "./notes/m3.ts";
 import m4Notes from "./notes/m4.ts";
 import m5Notes from "./notes/m5.ts";
+import m6Notes from "./notes/m6.ts";
 import m8Notes from "./notes/m8.ts";
 import m9Notes from "./notes/m9.ts";
 
@@ -23,6 +24,7 @@ const NOTES: Record<string, string[]> = {
   m3: m3Notes,
   m4: m4Notes,
   m5: m5Notes,
+  m6: m6Notes,
   m8: m8Notes,
   m9: m9Notes,
 };
