@@ -132,6 +132,7 @@ const PHRASES = [
   "내 동료의 도구를 써 보고 남긴 한 줄",
   "남은 일 (추후 계획)",
 ];
+// 프롬프트 카드 자체는 check-seed 가 원고와 글자까지 대조한다. 여기서는 안내문과 칸 이름만 본다.
 for (const phrase of PHRASES) {
   check(`원고에 "${phrase.slice(0, 12)}…" 이 있다`, manuscript.includes(phrase));
   check(`시딩이 원고와 같다 — "${phrase.slice(0, 12)}…"`, seed.includes(phrase));

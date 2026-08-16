@@ -1,6 +1,7 @@
 // README 초안과 링크 검증을 확인한다.
 // 실행: node scripts/check-readme.ts
 import { buildReadmeDraft, safeGithubUrl, safeHttpUrl } from "../lib/readme.ts";
+import { readmeOrder, readmeRanks } from "../lib/readmeOrder.ts";
 import type { Progress } from "../lib/types.ts";
 
 let failures = 0;
@@ -76,6 +77,33 @@ check("https 배포 주소 통과", safeHttpUrl("https://demo.vercel.app") !== n
 check("http 배포 주소 통과", safeHttpUrl("http://localhost:3000") !== null);
 check("javascript 배포 주소 거부", safeHttpUrl("javascript:alert(1)") === null);
 check("data 스킴 거부", safeHttpUrl("data:text/html,<script>") === null);
+
+// 발표 순서는 README 를 올린 순서다
+const person = (
+  name: string,
+  pushed: boolean,
+  at: { seconds: number; nanoseconds: number } | null,
+): Progress => ({ ...empty, name, readmePushed: pushed, readmePushedAt: at });
+
+// 실제 크기의 시각으로 본다. 초와 나노초를 한 숫자로 합치면 여기서 어긋난다.
+const NOW = 1_786_000_000;
+const people: Progress[] = [
+  person("다정", true, { seconds: NOW + 200, nanoseconds: 0 }),
+  person("가온", true, { seconds: NOW, nanoseconds: 1 }),
+  person("나래", true, { seconds: NOW, nanoseconds: 2 }),
+  person("라온", false, null),
+  person("마루", true, null), // 서버 시각이 아직 안 왔다
+];
+const order = readmeOrder(people);
+check("올린 순서대로 줄 세운다", JSON.stringify(order) === '["가온","나래","다정"]', order.join(","));
+check("표시하지 않은 사람은 빠진다", !order.includes("라온"));
+check("시각이 아직 없으면 빠진다", !order.includes("마루"));
+check("같은 초라도 나노초로 가른다", order.indexOf("가온") < order.indexOf("나래"));
+
+const ranks = readmeRanks(people);
+check("순번은 1부터", ranks.get("가온") === 1 && ranks.get("다정") === 3);
+check("빠진 사람은 순번이 없다", !ranks.has("라온") && !ranks.has("마루"));
+check("아무도 안 올렸으면 빈 목록", readmeOrder([]).length === 0);
 
 console.log(failures === 0 ? "\n전부 통과했습니다." : `\n${failures}건 실패했습니다.`);
 process.exit(failures === 0 ? 0 : 1);

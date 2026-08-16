@@ -67,6 +67,39 @@ for (const [id, want] of Object.entries(carry)) {
 
 // 프롬프트 카드
 check("m4 프롬프트 카드", missions.find((m) => m.id === "m4").promptCard?.includes("구현 계획을 만들어줘"));
+// 실패 케이스를 "테스트가 실패하는 것" 으로 오해하기 쉽다. 카드가 직접 풀어 준다.
+const m4card = missions.find((m) => m.id === "m4").promptCard ?? "";
+check(
+  "m4 카드가 정상·실패 케이스를 풀어 준다",
+  m4card.includes("제대로 썼을 때") &&
+    m4card.includes("비어 있을 때, 형식이 어긋날 때, 너무 많거나 적을 때"),
+);
+check("m4 카드에 케이스 예시가 있다", (m4card.match(/예\) "/g) ?? []).length === 2);
+check(
+  "m4 카드가 실패 유형을 강요하지 않는다",
+  m4card.includes("이 도구에서 실제로 벌어질 실패 상황"),
+);
+
+// 카드는 원고 §B 원문을 그대로 옮긴 것이다. 한쪽만 고치면 여기서 잡힌다.
+const manuscript = readFileSync(
+  new URL("../원고-실습콘텐츠-이승엽파트.md", import.meta.url),
+  "utf8",
+);
+const fences = [...manuscript.matchAll(/```[^\n]*\n([\s\S]*?)```/g)].map((m) =>
+  m[1].replace(/\r/g, "").trimEnd(),
+);
+const CARD_HEADS = {
+  m4: "아래 PRD로 구현 계획을 만들어줘",
+  m5: "너는 까다로운 소프트웨어 설계 리뷰어다",
+  m8: "너는 까다로운 코드 리뷰어다",
+};
+for (const [id, head] of Object.entries(CARD_HEADS)) {
+  const card = (missions.find((m) => m.id === id).promptCard ?? "")
+    .replace(/\r/g, "")
+    .trimEnd();
+  const fromDoc = fences.find((f) => f.startsWith(head));
+  check(`${id} 카드가 원고와 글자까지 같다`, fromDoc === card, fromDoc ? "" : "원고에서 못 찾음");
+}
 check("m5 프롬프트 카드", missions.find((m) => m.id === "m5").promptCard?.includes("설계 리뷰어"));
 check("m8 프롬프트 카드", missions.find((m) => m.id === "m8").promptCard?.includes("코드 리뷰어"));
 

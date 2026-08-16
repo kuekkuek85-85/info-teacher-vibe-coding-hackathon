@@ -114,7 +114,11 @@ export function useProgress(name: string | null) {
   const setReadmePushed = async (pushed: boolean) => {
     if (!name) throw new Error("이름이 없습니다");
     try {
-      await updateDoc(doc(getDb(), "progress", name), { readmePushed: pushed });
+      await updateDoc(doc(getDb(), "progress", name), {
+        readmePushed: pushed,
+        // 발표 순서를 이 시각으로 잡는다. 서버 시계라 앞당길 수 없다.
+        readmePushedAt: pushed ? serverTimestamp() : null,
+      });
     } catch (e) {
       if (isPermissionDenied(e)) setExpired(true);
       throw e;

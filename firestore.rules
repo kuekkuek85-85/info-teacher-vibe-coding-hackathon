@@ -34,6 +34,13 @@ service cloud.firestore {
                 && request.resource.data.readmeDraft.size() <= 20000))
         && (!('readmePushed' in request.resource.data)
             || request.resource.data.readmePushed is bool)
+        // 제출 시각은 서버 시계만 쓴다. 앞당겨 적어 발표 순서를 당길 수 없다.
+        // 값을 그대로 들고 가는 저장은 막지 않는다. 막으면 체크 뒤에 아무것도 못 쓴다.
+        && (!('readmePushedAt' in request.resource.data)
+            || request.resource.data.readmePushedAt
+               == resource.data.get('readmePushedAt', null)
+            || request.resource.data.readmePushedAt == null
+            || request.resource.data.readmePushedAt == request.time)
         && (!('reviewTarget' in request.resource.data)
             || request.resource.data.reviewTarget == resource.data.get('reviewTarget', ''));
     }

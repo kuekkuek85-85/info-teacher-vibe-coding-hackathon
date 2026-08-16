@@ -54,6 +54,8 @@ export interface Progress {
   readmeDraft?: string;
   /** 저장소에 README 를 올렸는지. 발표 준비 상태를 본다 */
   readmePushed?: boolean;
+  /** README 를 올렸다고 표시한 시각. 발표 순서를 이 순서로 잡는다 */
+  readmePushedAt?: unknown;
 }
 
 export interface RosterEntry {

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import Modal from "@/components/Modal";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
+import { readmeOrder, readmeRanks } from "@/lib/readmeOrder";
 import type { Mission, Progress, RosterEntry } from "@/lib/types";
 
 const PIN_KEY = "basecamp:pin";
@@ -243,6 +244,9 @@ export default function TeacherPage() {
   const deployed = Object.values(people).filter(
     (p) => p.missions?.m7?.status === "submitted",
   );
+  // README 를 올린 순서가 곧 발표 순서다.
+  const readmeReady = readmeOrder(Object.values(people));
+  const readmeRank = readmeRanks(Object.values(people));
 
   const cell = (p: Progress | undefined, m: Mission) => {
     // 회색 글자를 만들지 않는다. 굵기와 표면으로 상태를 구분한다.
@@ -453,8 +457,18 @@ export default function TeacherPage() {
                   </td>
                   <td className="body-sm border-b border-hairlineSoft px-2 py-1 text-center">
                     {p?.readmePushed ? (
-                      <span className="link-strong" title="README 를 올렸습니다">
+                      <span
+                        className="link-strong whitespace-nowrap"
+                        title={
+                          readmeRank.has(r.name)
+                            ? `README 를 ${readmeRank.get(r.name)}번째로 올렸습니다`
+                            : "README 를 올렸습니다"
+                        }
+                      >
                         ✓
+                        {readmeRank.has(r.name) ? (
+                          <span className="caption ml-1">{readmeRank.get(r.name)}</span>
+                        ) : null}
                       </span>
                     ) : (
                       "·"
@@ -492,10 +506,22 @@ export default function TeacherPage() {
 
       <section className="mt-16">
         <p className="eyebrow">발표 순서</p>
-        {deployed.length === 0 ? (
-          <p className="body-lg mt-4">아직 m7 제출자가 없습니다.</p>
+        {deployed.length === 0 && readmeReady.length === 0 ? (
+          <p className="body-lg mt-4">아직 m7 제출자도 README 를 올린 사람도 없습니다.</p>
         ) : (
           <>
+            <p className="body-sm mt-4">
+              README 를 올린 순서로 채운 다음 손으로 고칠 수 있습니다. 표의 README 칸에
+              적힌 숫자가 그 순서입니다.
+            </p>
+            <button
+              type="button"
+              className="btn-secondary mt-4"
+              disabled={readmeReady.length === 0}
+              onClick={() => setOrder(readmeReady)}
+            >
+              README 순서로 채우기
+            </button>
             <div className="mt-4 flex flex-wrap gap-3">
               {deployed.map((p) => (
                 <button
