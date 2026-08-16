@@ -20,6 +20,7 @@ const EXPECTED: Record<string, string> = {
   m2: "바이브 코딩 목적과 타겟 유저",
   m3: "PRD",
   m4: "구현 계획",
+  m5: "오케스트레이션",
 };
 for (const [id, title] of Object.entries(EXPECTED)) {
   const d = findDeck(id);

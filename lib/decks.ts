@@ -15,6 +15,7 @@ export const DECKS: Deck[] = [
   { id: "m2", title: "바이브 코딩 목적과 타겟 유저", count: 1 },
   { id: "m3", title: "PRD", count: 1 },
   { id: "m4", title: "구현 계획", count: 2 },
+  { id: "m5", title: "오케스트레이션", count: 1 },
 ];
 
 export function findDeck(id: string | undefined | null): Deck | null {
