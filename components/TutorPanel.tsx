@@ -93,7 +93,7 @@ export default function TutorPanel({
         ref={openerRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="btn-secondary fixed bottom-[80px] right-6 z-30"
+        className="btn-secondary fixed bottom-6 right-6 z-30"
       >
         AI 튜터
       </button>

@@ -55,6 +55,9 @@ export default function MissionPage({
           setName(null);
         }}
         notice="제출물에 학생 실명을 적지 마세요"
+        action={
+          <StuckButton stuck={progress?.stuck === true} onToggle={(next) => setStuck(next)} />
+        }
       />
       <main className="mx-auto max-w-[860px] px-6 pb-32 pt-10">
         <Link href="/" className="link-strong body-sm">
@@ -89,7 +92,6 @@ export default function MissionPage({
       {mission?.open ? (
         <TutorPanel name={name} missionId={mission.id} missionTitle={mission.title} />
       ) : null}
-      <StuckButton stuck={progress?.stuck === true} onToggle={(next) => setStuck(next)} />
       {expired ? (
         <ExpiredNotice
           onReenter={() => {

@@ -111,6 +111,9 @@ export default function HomePage() {
         role={role}
         onLeave={leave}
         notice={open ? "제출물에 학생 실명을 적지 마세요" : undefined}
+        action={
+          <StuckButton stuck={progress?.stuck === true} onToggle={(next) => setStuck(next)} />
+        }
       />
       <main className="mx-auto max-w-[1280px] px-6 pb-32 pt-12">
         <section>
@@ -159,11 +162,6 @@ export default function HomePage() {
           missionTitle={open.title}
         />
       ) : null}
-      <StuckButton
-        stuck={progress?.stuck === true}
-        onToggle={(next) => setStuck(next)}
-      />
-
       {casesModal}
       {expired ? <ExpiredNotice onReenter={leave} /> : null}
     </>

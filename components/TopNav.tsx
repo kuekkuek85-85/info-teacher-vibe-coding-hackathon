@@ -7,22 +7,29 @@ export default function TopNav({
   role,
   onLeave,
   notice,
+  action,
 }: {
   name?: string | null;
   role?: string | null;
   onLeave?: () => void;
   /** 헤더에 붙여 함께 고정할 경고. 스크롤해도 절대 가려지지 않는다. */
   notice?: string;
+  /** 로고 옆 왼쪽 자리. 막혔어요처럼 어디서든 눌러야 하는 것을 둔다 */
+  action?: React.ReactNode;
 }) {
   return (
     <header className="sticky top-0 z-20">
       <div className="border-b border-hairline bg-canvas">
         {/* 좁은 화면에서는 메뉴를 접어 두고 알약만 남긴다. 여는 장치는
             details/summary 라 자바스크립트 없이도 열린다. */}
-        <div className="mx-auto flex max-w-[1280px] items-center gap-x-5 px-6 py-2">
-          <Link href="/" className="headline">
+        {/* 좁은 화면에서는 줄을 바꾼다. 안 바꾸면 글자가 세로로 뭉개진다. */}
+        <div className="mx-auto flex max-w-[1280px] flex-wrap items-center gap-x-5 gap-y-2 px-6 py-2">
+          <Link href="/" className="headline whitespace-nowrap">
             베이스캠프
           </Link>
+
+          {/* 막혔어요는 여기 선다. 떠 있게 두면 스크롤할 때 본문을 덮는다. */}
+          {action}
 
           <nav className="hidden items-center gap-5 min-[1040px]:flex">
             <Link href="/plaza" className="link-strong body-sm py-2">
