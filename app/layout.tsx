@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import SlideOverlay from "@/components/SlideOverlay";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,7 +14,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className="min-h-screen bg-canvas text-ink">{children}</body>
+      <body className="min-h-screen bg-canvas text-ink">
+        {/* 자료가 떠 있는 동안 이 안쪽을 통째로 잠근다. 마우스도 키보드도 닿지 않는다. */}
+        <div id="app-root">{children}</div>
+        {/* 강사가 자료를 띄우면 어느 화면에 있든 덮는다. */}
+        <SlideOverlay />
+      </body>
     </html>
   );
 }

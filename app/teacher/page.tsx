@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, doc, onSnapshot } from "firebase/firestore";
 import Modal from "@/components/Modal";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
+import { DECKS, clampIndex, findDeck, slideSrc } from "@/lib/decks";
 import { readmeOrder, readmeRanks } from "@/lib/readmeOrder";
 import type { Mission, Progress, RosterEntry } from "@/lib/types";
 
@@ -45,6 +46,8 @@ export default function TeacherPage() {
   const [order, setOrder] = useState<string[]>([]);
   const [workshopCode, setWorkshopCode] = useState("");
   // 프로젝터로 전환하는 순간 전원의 코드가 새어 나가지 않도록 기본은 가린다.
+  const [slideDeck, setSlideDeck] = useState("");
+  const [slideIndex, setSlideIndex] = useState(0);
   const [codesOpen, setCodesOpen] = useState(false);
   const [codesError, setCodesError] = useState<string | null>(null);
   const [codesLoading, setCodesLoading] = useState(false);
@@ -94,6 +97,12 @@ export default function TeacherPage() {
               .sort((a, b) => a.order - b.order),
           ),
         ),
+        // 참가자 화면에 지금 무엇이 떠 있는지. 다른 기기에서 넘겨도 여기가 따라온다.
+        onSnapshot(doc(db, "config", "slides"), (snap) => {
+          const data = snap.data();
+          setSlideDeck(typeof data?.deck === "string" ? data.deck : "");
+          setSlideIndex(typeof data?.index === "number" ? data.index : 0);
+        }),
       );
     })();
 
@@ -184,6 +193,40 @@ export default function TeacherPage() {
     },
     [pin],
   );
+
+  // 참가자 화면에 띄운 자료를 넘긴다. 화면 상태는 Firestore 구독이 따라온다.
+  const showing = findDeck(slideDeck);
+  const move = useCallback(
+    (to: number) => {
+      if (!showing) return;
+      call("showSlides", { deck: showing.id, index: clampIndex(showing, to) });
+    },
+    [call, showing],
+  );
+
+  // 자료를 띄운 동안에는 화살표로 넘긴다. 마우스를 찾지 않아도 되게.
+  useEffect(() => {
+    if (!showing) return;
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      // 넘기는 키가 대시보드를 함께 스크롤하지 않게 한다.
+      if (e.key === "ArrowRight" || e.key === "PageDown") {
+        e.preventDefault();
+        move(slideIndex + 1);
+      }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        move(slideIndex - 1);
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        call("hideSlides");
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showing, slideIndex, move, call]);
 
   const verify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,6 +369,73 @@ export default function TeacherPage() {
             </p>
           </div>
         ) : null}
+      </section>
+
+      <section className="mt-16">
+        <p className="eyebrow">함께 보기</p>
+        <p className="body-sm mt-4">
+          띄우면 참가자 화면이 이 자료로 덮입니다. 끄기 전까지 참가자는 다른 것을 누르지
+          못합니다. 화살표 키로 넘기고 Esc 로 끕니다.
+        </p>
+
+        {!showing ? (
+          <div className="mt-5 flex flex-wrap gap-3">
+            {DECKS.map((d) => (
+              <button
+                key={d.id}
+                type="button"
+                disabled={busy}
+                className="btn-secondary"
+                onClick={() => call("showSlides", { deck: d.id, index: 0 })}
+              >
+                {d.title} 슬라이드 보기
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="body-lg link-strong flex-1">{showing.title}</span>
+              <span className="caption">
+                {clampIndex(showing, slideIndex) + 1} / {showing.count}
+              </span>
+            </div>
+
+            <img
+              src={slideSrc(showing, clampIndex(showing, slideIndex))}
+              alt={`${showing.title} ${clampIndex(showing, slideIndex) + 1}번째 슬라이드`}
+              className="mt-4 w-full max-w-[720px]"
+              style={{ borderRadius: 8 }}
+            />
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={busy || slideIndex <= 0}
+                onClick={() => move(slideIndex - 1)}
+              >
+                이전
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                disabled={busy || slideIndex >= showing.count - 1}
+                onClick={() => move(slideIndex + 1)}
+              >
+                다음
+              </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                disabled={busy}
+                onClick={() => call("hideSlides")}
+              >
+                끄기
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="mt-16">

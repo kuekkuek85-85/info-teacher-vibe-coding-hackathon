@@ -201,12 +201,12 @@ npm run reset
 
 워크숍이 끝나고 일주일 안에 지웁니다.
 
-1. Firestore에서 `progress`, `reviews`, `codes`, `roster` 컬렉션 삭제
+1. Firestore에서 `progress`, `reviews`, `codes`, `roster`, `tutorUsage` 컬렉션 삭제
 2. Authentication에서 익명 사용자 전체 삭제
 3. Vercel 환경 변수의 `WORKSHOP_CODE` 를 지우거나 배포를 내림
 4. 참가자 산출물을 연구회와 공유할 때는 이름을 빼고 내용만 옮깁니다
 
-`missions`와 `config`는 콘텐츠라 남겨 두어도 됩니다.
+`missions`와 `config`는 콘텐츠라 남겨 두어도 됩니다. 다만 `config/slides`는 참가자 화면을 덮는 상태라서 띄운 채로 두면 다음에 들어온 사람의 화면이 막힙니다. `npm run reset`이 이것까지 내립니다.
 
 ## 라우트
 

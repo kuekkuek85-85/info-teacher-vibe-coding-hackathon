@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/admin";
+import { clampIndex, findDeck } from "@/lib/decks";
 import { resolveFallbackReviewer } from "@/lib/fallbackReviewer";
 import { pairUp } from "@/lib/pairing";
 
@@ -58,6 +59,26 @@ export async function POST(request: Request) {
         const missionId = String(body.missionId ?? "");
         if (!missionId) return NextResponse.json({ ok: false }, { status: 400 });
         await adminDb.collection("missions").doc(missionId).update({ open: false });
+        return NextResponse.json({ ok: true });
+      }
+
+      // 참가자 화면을 강사가 잡는다. 자료가 떠 있는 동안 참가자는 다른 것을 누르지 못한다.
+      case "showSlides": {
+        const deck = findDeck(String(body.deck ?? ""));
+        if (!deck) return NextResponse.json({ ok: false }, { status: 400 });
+        const index = clampIndex(deck, Number(body.index ?? 0));
+        await adminDb
+          .collection("config")
+          .doc("slides")
+          .set({ deck: deck.id, index }, { merge: true });
+        return NextResponse.json({ ok: true, index });
+      }
+
+      case "hideSlides": {
+        await adminDb
+          .collection("config")
+          .doc("slides")
+          .set({ deck: "", index: 0 }, { merge: true });
         return NextResponse.json({ ok: true });
       }
 
