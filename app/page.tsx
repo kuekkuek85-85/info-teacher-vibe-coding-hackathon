@@ -18,6 +18,13 @@ import {
 } from "@/lib/session";
 import { useProgress } from "@/lib/useProgress";
 
+/**
+ * 접속하자마자 수업 사례를 띄울지. 1일차 오후 소개에 쓰고 껐다.
+ * 다시 띄우려면 true 로 바꾸고, 이미 닫은 사람에게도 보여야 하면
+ * lib/session.ts 의 casesSeen 키 판을 올린다.
+ */
+const SHOW_CASES_POPUP = false;
+
 export default function HomePage() {
   const [name, setName] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -30,9 +37,9 @@ export default function HomePage() {
     setRole(getSavedRole());
     setRestored(true);
 
-    // 들어오면 사례를 한 번 띄운다. 닫고 나면 다시 막아서지 않는다.
-    // 하루 종일 미션을 쓰는 화면이라 매번 가리면 일이 안 된다.
-    if (!hasSeenCases()) setCasesOpen(true);
+    // 사례 팝업은 1일차 오후 소개용이었다. 2일차에는 미션에 바로 들어가야 해서 끈다.
+    // 내용은 그대로 있다. 상단 메뉴의 수업 사례나 /cases 에서 볼 수 있다.
+    if (SHOW_CASES_POPUP && !hasSeenCases()) setCasesOpen(true);
   }, []);
 
   const closeCases = () => {
