@@ -97,7 +97,8 @@ export default function SlideOverlay() {
       style={{ outline: "none" }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3">
-        <span className="caption text-inverseInk">{deck.title}</span>
+        {/* 자료 제목은 분류 라벨이 아니라 내용이다. Git 이 GIT 이 되면 안 된다. */}
+        <span className="caption normal-case text-inverseInk">{deck.title}</span>
         <span className="caption text-inverseInk">
           {at + 1} / {deck.count}
         </span>

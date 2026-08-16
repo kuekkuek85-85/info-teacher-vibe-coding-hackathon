@@ -23,6 +23,7 @@ const EXPECTED: Record<string, string> = {
   m4: "구현 계획",
   m5: "오케스트레이션",
   m6: "TDD",
+  m7: "Git",
   m8: "리팩토링",
   m9: "공유 및 발표(README)",
 };
@@ -75,6 +76,10 @@ check("참가자 화면을 덮는다", overlay.includes('aria-modal="true"'));
 check("강사 화면은 덮지 않는다", overlay.includes('pathname?.startsWith("/teacher")'));
 check("덮는 동안 스크롤을 막는다", overlay.includes('document.body.style.overflow = "hidden"'));
 check("다음 장을 미리 받는다", overlay.includes('rel="preload"'));
+// caption 은 대문자로 바뀐다. 제목까지 바뀌면 Git 이 GIT 이 된다.
+check("자료 제목은 대문자로 바뀌지 않는다", overlay.includes('caption normal-case'));
+const design = readFileSync(new URL("../DESIGN.md", import.meta.url), "utf8");
+check("이 예외가 DESIGN 에 적혀 있다", design.includes("모노 대문자 변환을 뺀다"));
 // 가리기만 하면 Tab 으로 아래 버튼에 닿는다
 check("아래 화면을 통째로 잠근다", overlay.includes('setAttribute("inert", "")'));
 check("잠금을 풀어 준다", overlay.includes('removeAttribute("inert")'));
