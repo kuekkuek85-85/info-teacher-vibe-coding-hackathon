@@ -80,5 +80,31 @@ check("m6 프리필 출처", m6.prefill?.fromMission === "m4" && m6.prefill?.fro
 const pushed = missions.find((m) => m.id === "m8").fields.find((f) => f.key === "pushed");
 check("m8 pushed 선택지", JSON.stringify(pushed.options) === JSON.stringify(["예", "아니오"]));
 
+// 진행 시점. 1일차에 m1·m2 를 못 해서 2일차 아침으로 옮겼다.
+// 안내문이 옛 일정으로 되돌아가면 여기서 잡힌다.
+const m1 = missions.find((m) => m.id === "m1");
+const m2 = missions.find((m) => m.id === "m2");
+check("m1 세션이 2일차 아침", m1.session === "2일차 아침", m1.session);
+check("m2 세션이 2일차 아침", m2.session === "2일차 아침", m2.session);
+check(
+  "m2 안내문에 숙제 표현이 없다",
+  !/자기 전에|내일 아침|숙제/.test(m2.guide),
+  m2.guide.slice(0, 30),
+);
+check(
+  "m2 안내문이 다음 단계를 가리킨다",
+  m2.guide.includes("다음 단계"),
+  m2.guide.slice(-40),
+);
+
+const m3problem = missions
+  .find((m) => m.id === "m3")
+  .fields.find((f) => f.key === "problem");
+check(
+  "m3 자리표시자에 어제가 없다",
+  !m3problem.placeholder.includes("어제"),
+  m3problem.placeholder,
+);
+
 console.log(failures === 0 ? "\n전부 통과했습니다." : `\n${failures}건 실패했습니다.`);
 process.exit(failures === 0 ? 0 : 1);

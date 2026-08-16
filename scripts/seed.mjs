@@ -73,7 +73,7 @@ const missions = [
     order: 1,
     title: "내 수업 병목 찾기",
     stepLabel: "발견",
-    session: "1일차 16시",
+    session: "2일차 아침",
     visibility: "private",
     guide:
       "잘하고 싶은 것 말고 아픈 것을 적습니다. 매주 반복되는 일, 학생을 기다리게 하는 순간, 아직 손으로 하는 작업이면 전부 병목입니다. 국면마다 하나 이상 적어 주세요.",
@@ -110,10 +110,10 @@ const missions = [
     order: 2,
     title: "아이디어 한 줄",
     stepLabel: "발견",
-    session: "1일차 숙제",
+    session: "2일차 아침",
     visibility: "public",
     guide:
-      "자기 전에 한 문장이면 됩니다. 누가, 무엇 때문에 힘든데, 어떤 도구가 있으면 되는지. 내일 아침 이 문장에서 시작하니 완성도는 신경 쓰지 마세요.",
+      "한 문장이면 됩니다. 누가, 무엇 때문에 힘든데, 어떤 도구가 있으면 되는지 적어 주세요. 바로 다음 단계에서 이 문장을 PRD로 키우니 완성도는 신경 쓰지 마세요.",
     fields: [
       { key: "oneline", label: "아이디어 한 줄", type: "textarea" },
       { key: "user", label: "이 도구의 사용자 (학생/교사/학부모)", type: "text" },
@@ -134,7 +134,7 @@ const missions = [
         key: "problem",
         label: "문제(병목) 한 문단",
         type: "textarea",
-        placeholder: "어제 m1의 병목을 문단으로",
+        placeholder: "m1 에 적은 병목을 문단으로",
       },
       {
         key: "mvp",
