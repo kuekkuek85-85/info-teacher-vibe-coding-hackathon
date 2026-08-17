@@ -55,7 +55,9 @@ export default function MissionDetail({
 
   const card = mission.promptCard ? (
     <PromptCard
-      key={mission.id}
+      // 칸을 옮기면 카드를 새로 만든다. 앞 칸에서 고친 내용이 남지 않는다.
+      // 아래 폼과 같은 부모에 서므로 열쇠가 겹치지 않게 앞말을 붙인다.
+      key={`card-${mission.id}`}
       text={buildPromptText(mission, missions, progress)}
       storageKey={`prompt:${name}:${mission.id}`}
       filled={Boolean(mission.promptFill)}
@@ -116,7 +118,7 @@ export default function MissionDetail({
         ) : null}
 
         <MissionForm
-          key={mission.id}
+          key={`form-${mission.id}`}
           mission={mission}
           progress={progress}
           name={name}

@@ -126,14 +126,19 @@ const detail = readFileSync(
   new URL("../components/MissionDetail.tsx", import.meta.url),
   "utf8",
 );
+// 둘은 같은 부모 아래 나란히 선다. 열쇠가 같으면 React 가 하나를 버린다.
 check(
   "카드가 미션마다 새로 만들어진다",
-  /<PromptCard\s+key=\{mission\.id\}/.test(detail),
+  /key=\{`card-\$\{mission\.id\}`\}/.test(detail),
   "MissionDetail 의 key 프롭",
 );
 check(
   "제출 양식도 미션마다 새로 만들어진다",
-  /<MissionForm\s+key=\{mission\.id\}/.test(detail),
+  /<MissionForm\s+key=\{`form-\$\{mission\.id\}`\}/.test(detail),
+);
+check(
+  "둘의 열쇠가 겹치지 않는다",
+  !/key=\{mission\.id\}/.test(detail),
 );
 // 서버 응답이 늦는 사이에 적은 것을 늦게 온 스냅샷이 덮으면 안 된다
 const form = readFileSync(new URL("../components/MissionForm.tsx", import.meta.url), "utf8");
