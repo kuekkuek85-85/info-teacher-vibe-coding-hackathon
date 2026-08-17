@@ -53,7 +53,36 @@ check(
   round[0].checked && !round[1].checked && round[2].checked,
 );
 
-// 6. 이름에 콜론이 섞인 옛 값이 와도 터지지 않는다
+// 6. 글자마다 저장하고 다시 읽는 칸이라, 방금 친 끝 공백이 살아남아야 띄어쓰기가 된다
+const typing = [...empty];
+typing[1] = { option: "교사", checked: true, detail: "수준별 " };
+const midway = formatRoles(typing);
+check("끝 공백을 그대로 담는다", midway === "[v] 교사: 수준별 ", JSON.stringify(midway));
+check(
+  "다시 읽어도 끝 공백이 남는다",
+  parseRoles(midway, OPTIONS)[1].detail === "수준별 ",
+  JSON.stringify(parseRoles(midway, OPTIONS)[1].detail),
+);
+// 한 글자씩 치는 동안 값이 어긋나지 않아야 한다
+let sofar = "";
+let store = "";
+for (const ch of "수준별 문제 출제") {
+  sofar += ch;
+  const rows = parseRoles(store, OPTIONS);
+  rows[1] = { ...rows[1], checked: true, detail: rows[1].detail + ch };
+  store = formatRoles(rows);
+}
+check(
+  "한 글자씩 쳐도 띄어쓰기가 남는다",
+  parseRoles(store, OPTIONS)[1].detail === sofar,
+  parseRoles(store, OPTIONS)[1].detail,
+);
+// 줄바꿈이 들어오면 형식이 깨진다. 한 칸으로 눕힌다
+const multi = [...empty];
+multi[0] = { option: "학생", checked: true, detail: "앞\n뒤" };
+check("줄바꿈은 한 칸으로", formatRoles(multi) === "[v] 학생: 앞 뒤", formatRoles(multi));
+
+// 7. 이름에 콜론이 섞인 옛 값이 와도 터지지 않는다
 const messy = parseRoles("학생: 첫 줄: 두 번째 콜론", OPTIONS);
 check("체크 표시가 없으면 꺼진 것으로 본다", messy[0].checked === false);
 check("콜론 뒤 전체를 설명으로 본다", messy[0].detail === "첫 줄: 두 번째 콜론", messy[0].detail);
