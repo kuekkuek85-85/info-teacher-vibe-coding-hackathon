@@ -10,10 +10,12 @@ import Stepper from "@/components/Stepper";
 import StuckButton from "@/components/StuckButton";
 import TutorPanel from "@/components/TutorPanel";
 import TopNav from "@/components/TopNav";
+import { POLICY_VERSION } from "@/lib/policy";
 import {
   clearSession,
   getSavedName,
   getSavedRole,
+  hasAgreed,
   hasSeenCases,
   markCasesSeen,
 } from "@/lib/session";
@@ -30,6 +32,7 @@ export default function HomePage() {
   const [name, setName] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [casesOpen, setCasesOpen] = useState(false);
   const [picked, setPicked] = useState<string | null>(null);
   const { progress, missions, ready, expired, saveMission, submitMission, setStuck } =
@@ -51,6 +54,7 @@ export default function HomePage() {
   useEffect(() => {
     setName(getSavedName());
     setRole(getSavedRole());
+    setAgreed(hasAgreed(POLICY_VERSION));
     setRestored(true);
 
     // 새로고침이나 링크로 들어온 자리를 먼저 본다
@@ -61,6 +65,7 @@ export default function HomePage() {
     // 내용은 그대로 있다. 상단 메뉴의 수업 사례나 /cases 에서 볼 수 있다.
     if (SHOW_CASES_POPUP && !hasSeenCases()) setCasesOpen(true);
   }, []);
+
 
   const closeCases = () => {
     setCasesOpen(false);
@@ -82,6 +87,9 @@ export default function HomePage() {
     ) : null;
 
   if (!restored) return null;
+
+  // 약관 서약은 ConsentGuard 가 어느 화면에서나 받는다. 여기서는 화면만 감춘다.
+  if (!agreed) return null;
 
   // 참가자는 입장 화면을 먼저 본다. 여기서 안 띄우면 사례를 못 보고 지나간다.
   if (!name) {

@@ -68,6 +68,8 @@ export interface Progress {
   stuck: boolean;
   stuckAt?: unknown;
   reviewTarget?: string;
+  /** 마지막으로 입장한 날. 한국 시간 "2026-08-17" 꼴. 오늘 온 사람을 가린다 */
+  enteredDay?: string;
   /** 발표용 README. 초안을 고친 내용을 여기에 둔다 */
   readmeDraft?: string;
   /** 저장소에 README 를 올렸는지. 발표 준비 상태를 본다 */

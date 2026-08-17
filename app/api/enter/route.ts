@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { getAdminAuth, getAdminDb } from "@/lib/admin";
+import { seoulDay } from "@/lib/attendance";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +51,10 @@ export async function POST(request: Request) {
   const taken = await adminDb.runTransaction(async (tx) => {
     const snap = await tx.get(progressRef);
 
+    // 오늘 왔다는 표시. 명단에 있어도 못 오는 사람이 있어
+    // 대시보드와 짝 배정은 이 날짜를 보고 오늘 온 사람만 센다.
+    const enteredDay = seoulDay();
+
     if (!snap.exists) {
       tx.set(progressRef, {
         ownerUid: uid,
@@ -58,16 +64,24 @@ export async function POST(request: Request) {
         missions: {},
         currentStep: "m1",
         stuck: false,
+        enteredDay,
       });
       return false;
     }
 
-    const owner = (snap.data() as { ownerUid?: string | null })?.ownerUid;
-    if (owner && owner !== uid) return true;
+    const before = snap.data() as { ownerUid?: string | null; enteredDay?: string };
+    if (before.ownerUid && before.ownerUid !== uid) return true;
+
+    // 날이 바뀌었으면 어제 받은 검토 상대를 지운다. 어제 온 사람들로 짠 짝이라
+    // 오늘 명단과 맞지 않는다. 강사가 오늘 사람으로 다시 배정한다.
+    const carried =
+      before.enteredDay && before.enteredDay !== enteredDay
+        ? { reviewTarget: FieldValue.delete() }
+        : {};
 
     tx.set(
       progressRef,
-      { ownerUid: uid, name, school: roster.school, role: roster.role },
+      { ownerUid: uid, name, school: roster.school, role: roster.role, enteredDay, ...carried },
       { merge: true },
     );
     return false;

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/admin";
+import { attendees, seoulDay } from "@/lib/attendance";
 import { clampIndex, findDeck } from "@/lib/decks";
 import { resolveFallbackReviewer } from "@/lib/fallbackReviewer";
 import { pairUp } from "@/lib/pairing";
@@ -89,7 +91,29 @@ export async function POST(request: Request) {
           school: string;
           role: "student" | "staff";
         });
-        const students = roster.filter((r) => r.role === "student").map((r) => r.name);
+        // 명단에 있어도 못 오는 사람이 있다. 오늘 입장한 사람만 짝을 짓는다.
+        // 안 온 사람을 넣으면 그 상대는 검토를 기다리다 빈 자리를 마주한다.
+        const progressSnap = await adminDb.collection("progress").get();
+        const entered: Record<string, unknown> = {};
+        progressSnap.docs.forEach((d) => {
+          entered[d.id] = (d.data() as { enteredDay?: string }).enteredDay;
+        });
+        const today = seoulDay();
+        const students = attendees(
+          roster.filter((r) => r.role === "student").map((r) => r.name),
+          entered,
+          today,
+        );
+
+        if (students.length < 2) {
+          return NextResponse.json(
+            {
+              ok: false,
+              message: `오늘 입장한 학생이 ${students.length}명입니다. 두 명 이상 입장한 뒤에 배정해 주세요.`,
+            },
+            { status: 400 },
+          );
+        }
 
         const check = resolveFallbackReviewer(
           roster,
@@ -106,12 +130,28 @@ export async function POST(request: Request) {
         // 받아 짝이 어긋난다. 또 배정 도중 참가자가 입장하면 골격 문서가 방금
         // 만들어진 progress 를 덮어써 ownerUid 를 지운다. 하나의 트랜잭션으로 묶는다.
         const entries = [...assignment];
+        // 지난 배정이 남으면 오늘 빠진 사람에게 옛 상대가 붙어 있다.
+        // m8 의 동료 도구도 그 사람 것을 가리킨다. 이번 배정 밖은 지운다.
+        const stale = progressSnap.docs
+          .filter((d) => !assignment.has(d.id))
+          .filter((d) => (d.data() as { reviewTarget?: string }).reviewTarget)
+          .map((d) => d.id);
+
         await adminDb.runTransaction(async (tx) => {
           const refs = entries.map(([person]) =>
             adminDb.collection("progress").doc(person),
           );
+          const staleRefs = stale.map((person) =>
+            adminDb.collection("progress").doc(person),
+          );
           // 트랜잭션은 쓰기 전에 읽기를 모두 끝내야 한다.
           const snaps = await Promise.all(refs.map((ref) => tx.get(ref)));
+          const staleSnaps = await Promise.all(staleRefs.map((ref) => tx.get(ref)));
+
+          staleSnaps.forEach((snap, i) => {
+            if (!snap.exists) return;
+            tx.update(staleRefs[i], { reviewTarget: FieldValue.delete() });
+          });
 
           entries.forEach(([person, target], i) => {
             const ref = refs[i];

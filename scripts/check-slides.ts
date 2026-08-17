@@ -74,15 +74,17 @@ check("어느 화면에서나 덮인다", layout.includes("<SlideOverlay />"));
 const overlay = readFileSync(new URL("../components/SlideOverlay.tsx", import.meta.url), "utf8");
 check("참가자 화면을 덮는다", overlay.includes('aria-modal="true"'));
 check("강사 화면은 덮지 않는다", overlay.includes('pathname?.startsWith("/teacher")'));
-check("덮는 동안 스크롤을 막는다", overlay.includes('document.body.style.overflow = "hidden"'));
+// 덮는 것이 둘 이상이라 잠금은 lib/lockRoot.ts 한 곳에서 센다
+const lock = readFileSync(new URL("../lib/lockRoot.ts", import.meta.url), "utf8");
+check("덮는 동안 스크롤을 막는다", lock.includes('document.body.style.overflow = "hidden"'));
 check("다음 장을 미리 받는다", overlay.includes('rel="preload"'));
 // caption 은 대문자로 바뀐다. 제목까지 바뀌면 Git 이 GIT 이 된다.
 check("자료 제목은 대문자로 바뀌지 않는다", overlay.includes('caption normal-case'));
 const design = readFileSync(new URL("../DESIGN.md", import.meta.url), "utf8");
 check("이 예외가 DESIGN 에 적혀 있다", design.includes("모노 대문자 변환을 뺀다"));
 // 가리기만 하면 Tab 으로 아래 버튼에 닿는다
-check("아래 화면을 통째로 잠근다", overlay.includes('setAttribute("inert", "")'));
-check("잠금을 풀어 준다", overlay.includes('removeAttribute("inert")'));
+check("아래 화면을 통째로 잠근다", overlay.includes("lockRoot()"));
+check("잠금을 풀어 준다", overlay.includes("unlock()") && lock.includes('removeAttribute("inert")'));
 check("포커스를 데려온다", overlay.includes("panelRef.current?.focus()"));
 // inert 는 document 에 붙은 키 핸들러를 막지 못한다
 check("키 입력을 먼저 가로챈다", overlay.includes('addEventListener("keydown", swallow, true)'));

@@ -94,10 +94,50 @@ export function saveSession(name: string, role: string, school: string) {
   writeKey(SCHOOL_KEY, school);
 }
 
+/**
+ * 이름을 달고 브라우저에 남는 것들. 저장에 실패한 초안, README 사본,
+ * 프롬프트 카드에서 고친 내용이다. 키 안에 이름이 들어 있고 값에는 쓴 글이 들어 있다.
+ * 나가기는 기기를 넘기는 순간이다. 이름만 지우면 앞사람 글이 그대로 남는다.
+ */
+/** 서약도 함께 지운다. 다음 사람은 자기 눈으로 읽고 체크해야 한다. */
+const NAMED_PREFIXES = ["draft:", "prompt:", "readme:", "basecamp:agreed:"];
+
 export function clearSession() {
   removeKey(NAME_KEY);
   removeKey(ROLE_KEY);
   removeKey(SCHOOL_KEY);
+  // 저장소를 훑지 못하는 기기가 있다. 메모리에 쥐고 있는 것부터 놓는다.
+  // 이것을 빠뜨리면 동의 기록이 이번 접속 동안 살아남아 다음 사람이 약관을 건너뛴다.
+  for (const key of [...memory.keys()]) {
+    if (NAMED_PREFIXES.some((p) => key.startsWith(p))) removeKey(key);
+  }
+  // 누구 것인지 가리지 않고 다 지운다. 이름을 못 읽는 기기에서도 남지 않아야 한다.
+  try {
+    const doomed: string[] = [];
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const key = window.localStorage.key(i);
+      if (key && NAMED_PREFIXES.some((p) => key.startsWith(p))) doomed.push(key);
+    }
+    for (const key of doomed) removeKey(key);
+  } catch {
+    // 저장소를 못 읽으면 애초에 남은 것도 없다
+  }
+  announce();
+}
+
+/**
+ * 동의 상태가 바뀌었다는 소식.
+ * 문지기와 자료 덮개가 이것을 듣는다. 없으면 나간 뒤에도 다음 사람이
+ * 새로고침하기 전까지 약관을 읽지 않고 입장한다.
+ */
+export const CONSENT_CHANGED = "basecamp:consent";
+
+function announce() {
+  try {
+    window.dispatchEvent(new Event(CONSENT_CHANGED));
+  } catch {
+    // 서버에서 부를 일은 없지만 막아 둔다
+  }
 }
 
 const CASES_SEEN_KEY = "basecamp:casesSeen:v1";
@@ -109,4 +149,17 @@ export function hasSeenCases(): boolean {
 
 export function markCasesSeen() {
   writeKey(CASES_SEEN_KEY, "1");
+}
+
+/**
+ * 약관 서약. 판을 키에 넣어 두어 약관이 바뀌면 다시 받는다.
+ * 저장소가 막힌 기기에서는 이번 접속 동안만 기억한다. 새로고침하면 다시 읽는다.
+ */
+export function hasAgreed(version: string): boolean {
+  return readKey(`basecamp:agreed:${version}`) !== null;
+}
+
+export function markAgreed(version: string) {
+  writeKey(`basecamp:agreed:${version}`, "1");
+  announce();
 }

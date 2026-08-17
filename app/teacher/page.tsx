@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { collection, doc, onSnapshot } from "firebase/firestore";
 import Modal from "@/components/Modal";
+import { cameToday, seoulDay } from "@/lib/attendance";
 import { ensureAnonAuth, getDb } from "@/lib/firebase";
 import { deckNote } from "@/lib/deckNotes";
 import { DECKS, clampIndex, findDeck, slideSrc } from "@/lib/decks";
@@ -52,6 +53,8 @@ export default function TeacherPage() {
   const [codesOpen, setCodesOpen] = useState(false);
   const [codesError, setCodesError] = useState<string | null>(null);
   const [codesLoading, setCodesLoading] = useState(false);
+  // 명단에는 있지만 못 오는 사람이 있다. 기본은 오늘 온 사람만 본다.
+  const [todayOnly, setTodayOnly] = useState(true);
 
   // 저장된 PIN 이 있어도 서버에 다시 물어본 뒤에 들여보낸다.
   useEffect(() => {
@@ -278,25 +281,30 @@ export default function TeacherPage() {
     );
   }
 
-  const students = roster.filter((r) => r.role === "student");
+  // 명단에 있어도 못 오는 사람이 있다. 기본은 오늘 입장한 사람만 본다.
+  // 짝 배정도 오늘 온 사람으로만 하기 때문에 화면과 배정이 같은 것을 봐야 한다.
+  const today = seoulDay();
+  const here = roster.filter((r) => cameToday(people[r.name]?.enteredDay, today));
+  const shown = todayOnly ? here : roster;
+  const students = shown.filter((r) => r.role === "student");
   // 오래 기다린 사람이 위로 온다.
   const stuckSeconds = (p: Progress) =>
     (p.stuckAt as { seconds?: number } | undefined)?.seconds ?? Number.MAX_SAFE_INTEGER;
-  const stuckList = Object.values(people)
+  // 어제 남은 기록이 오늘 화면에 섞이지 않게, 목록도 같은 명단을 본다.
+  const seen = new Set(shown.map((r) => r.name));
+  const listed = Object.values(people).filter((p) => seen.has(p.name));
+  const stuckList = listed
     .filter((p) => p.stuck)
     .sort((a, b) => stuckSeconds(a) - stuckSeconds(b));
-  const deployed = Object.values(people).filter(
-    (p) => p.missions?.m7?.status === "submitted",
-  );
+  const deployed = listed.filter((p) => p.missions?.m7?.status === "submitted");
   // 배정이 없으면 m5 검토도 m8 동료 도구도 비어 보인다.
-  // 명단 기준으로 센다. 아직 입장하지 않아 문서가 없는 사람도 빠지면 안 된다.
-  const unassigned = roster
+  const unassigned = shown
     .filter((r) => r.role === "student" && !people[r.name]?.reviewTarget)
     .map((r) => r.name)
     .sort((a, b) => a.localeCompare(b, "ko"));
   // README 를 올린 순서가 곧 발표 순서다.
-  const readmeReady = readmeOrder(Object.values(people));
-  const readmeRank = readmeRanks(Object.values(people));
+  const readmeReady = readmeOrder(listed);
+  const readmeRank = readmeRanks(listed);
 
   const cell = (p: Progress | undefined, m: Mission) => {
     // 회색 글자를 만들지 않는다. 굵기와 표면으로 상태를 구분한다.
@@ -537,7 +545,23 @@ export default function TeacherPage() {
       </section>
 
       <section className="mt-16 overflow-x-auto">
-        <p className="eyebrow">진행 현황</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="eyebrow">진행 현황</p>
+          {/* 오늘 못 오는 사람이 있다. 안 온 줄이 섞이면 누가 막혔는지 보이지 않는다. */}
+          <button
+            type="button"
+            className="btn-secondary"
+            aria-pressed={todayOnly}
+            onClick={() => setTodayOnly((v) => !v)}
+          >
+            {todayOnly ? "전체 명단 보기" : "오늘 온 사람만 보기"}
+          </button>
+        </div>
+        {todayOnly && here.length === 0 ? (
+          <p className="body-sm mt-4">
+            오늘 입장한 사람이 아직 없습니다. 참가자가 들어오면 여기에 나타납니다.
+          </p>
+        ) : null}
         <table className="mt-4 w-full min-w-[720px]">
           <thead>
             <tr>
@@ -564,7 +588,7 @@ export default function TeacherPage() {
             </tr>
           </thead>
           <tbody>
-            {roster.map((r) => {
+            {shown.map((r) => {
               const p = people[r.name];
               return (
                 <tr key={r.name}>
@@ -640,8 +664,9 @@ export default function TeacherPage() {
           </tbody>
         </table>
         <p className="body-sm mt-4">
-          ✓ 제출, ◐ 작성 중, · 미시작, 🔒 잠김. 학생 {students.length}명, 전체{" "}
-          {roster.length}명입니다.
+          ✓ 제출, ◐ 작성 중, · 미시작, 🔒 잠김. {todayOnly ? "오늘 온" : "명단"} 학생{" "}
+          {students.length}명, 오늘 온 사람 {here.length}명, 명단 {roster.length}명입니다.
+          짝 배정은 오늘 온 사람만으로 합니다.
         </p>
       </section>
 
